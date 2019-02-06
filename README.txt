@@ -1,0 +1,1 @@
+Quick test to learn how to make ESP 32 to get GPS data from BN-880 GPS module.
