@@ -33,6 +33,7 @@ void switchState(States *curr_state, States new_state){
  */
 void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, float *distToTrgt, States *state) {
 	static int launch_count, apogee_count, deploy_count, release_count
+  static unsigned long delay_start
 
 	switch (*state) {
 		case STANDBY:
@@ -55,6 +56,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 				apogee_count++;
 				if (apogee_count >= APOGEE_CHECKS) {
 					switchState(state, DESCENT);
+          delay_start = millis(); // !!!!!!! TODO: check millis() works on esp !!!!!!!!! 
 					apogee_count = 0;
 				}
 			} else {
@@ -64,7 +66,6 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 
 		// Deploy drogue chute
 		case DESCENT:
-			unsigned long delay_start = millis(); // !!!!!!! TODO: check millis() works on esp !!!!!!!!!
 			if ((millis() - delay_start) >= SEPARATION_DELAY) {
 				deploy_count++;
 				if (deploy_count >= DEPLOYMENT_CHECKS) {
