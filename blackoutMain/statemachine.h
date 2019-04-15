@@ -11,7 +11,7 @@
 
 // Various thresholds/ event altitudes
 #define LAUNCH_THRESHOLD 50 // meters above ground
-#define CHUTE_RELEASE_ALT 250 // meters above ground TODO: run the numbers, see if 1 sec fall is ok
+#define CHUTE_RELEASE_ALT 550 // meters above ground TODO: run the numbers, see if 1 sec fall is ok
 
 // Timing delays
 #define SEPARATION_DELAY 3000 // ms (Free fall away from rocket for 3 sec before chute deploy)
