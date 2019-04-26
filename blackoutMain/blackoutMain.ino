@@ -1,15 +1,14 @@
 
 /*---Includes-----------------------------------------------------------*/
 #include "statemachine.h"
-
+#include "sensors.h"
 /*---Variables----------------------------------------------------------*/
-
-
+static double lat, lon;
 
 /*---Functions----------------------------------------------------------*/
 void setup() {
   // Initialize sensors
-
+  initSensors();
 }
 
 void loop() {
@@ -31,7 +30,7 @@ void loop() {
     delta_time = new_time - old_time;
     old_time = new_time;
 
-    pollSensors();
+    pollSensors(&lat, &lon);
     calculateValues();
     stateMachine();
     }
