@@ -5,6 +5,10 @@
 /*---Variables----------------------------------------------------------*/
 static double lat, lon;
 
+static float barData[];
+static float accelData[];
+static float magData[];
+
 /*---Functions----------------------------------------------------------*/
 void setup() {
   // Initialize sensors
@@ -30,7 +34,7 @@ void loop() {
     delta_time = new_time - old_time;
     old_time = new_time;
 
-    pollSensors(&lat, &lon);
+    pollSensors(&lat, &lon, barData, accelData, magData);
     calculateValues();
     stateMachine();
     }
