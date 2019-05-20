@@ -38,5 +38,5 @@ enum States {
 
 /*---Functions-------*/
 void changeState(States *curr_state, States new_state);
-void stateMachine(float*, float*, float*, float*, float*, float*, States*)
+void stateMachine(float*, float*, float*, float*, float*, float*, States*);
 #endif

@@ -3,11 +3,12 @@
 #include "statemachine.h"
 #include "sensors.h"
 /*---Variables----------------------------------------------------------*/
+static States state = STANDBY;
 static double lat, lon;
 
-static float barData[];
-static float accelData[];
-static float magData[];
+static float barData[2];
+static float accelData[4];
+static float magData[4];
 
 /*---Functions----------------------------------------------------------*/
 void setup() {

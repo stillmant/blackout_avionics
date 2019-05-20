@@ -8,13 +8,12 @@
 #include <MPU9250_asukiaaa.h>
 
 /*Definitions----------------------------------------------------------*/
-
+#define TASK_SERIAL_RATE 100 // for GPS
 /*Set up---------------------------------------------------------------*/
 
 // GPS
 TinyGPSPlus gps;
 HardwareSerial SerialGPS(1);
-#define TASK_SERIAL_RATE 100
 
 // GY-91 
 MPU9250 mpu9250;
@@ -28,9 +27,7 @@ uint32_t nextSerialTaskTs = 0; // for GPS
  * @brief  Initializes all the sensors
  * @return void
  */
-
-void initSensors()
-{
+void initSensors(){
     SerialGPS.begin(9600, SERIAL_8N1, 16, 17); // GPS on pins 16 & 17
     
     SerialMPU.begin(115200, SERIAL_8N1, 21, 22);
@@ -90,7 +87,7 @@ void pollSensors(double *lat, double *lon, float barData[], float accelData[], f
     accelData[0] = mpu9250.accelX();
     accelData[1] = mpu9250.accelY();
     accelData[2] = mpu9250.accelZ();
-    accelData[3] = mpu9250.accelSqrt()
+    accelData[3] = mpu9250.accelSqrt();
 
     mpu9250.magUpdate();
     magData[0] = mpu9250.magX();

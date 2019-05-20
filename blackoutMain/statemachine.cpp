@@ -1,4 +1,4 @@
-/* Author: Tonio Stillman
+/* 
  * Reference: UBC Rocket Avionics 2018/2019 code
  * Description: State machine for UBC Rocket BLACKOUT Payload Vehicle's states
  */
@@ -32,8 +32,8 @@ void switchState(States *curr_state, States new_state){
  * @return void.
  */
 void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, float *distToTrgt, States *state) {
-	static int launch_count, apogee_count, deploy_count, release_count
-  static unsigned long delay_start
+	static int launch_count, apogee_count, deploy_count, release_count;
+  static unsigned long delay_start;
 
 	switch (*state) {
 		case STANDBY:
