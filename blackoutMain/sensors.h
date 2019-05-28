@@ -20,5 +20,5 @@
 /*Functions------------------------------------------------------------*/
 void initSensors();
 
-void pollSensors(double*, double*, float*, float*, float*);
+void pollSensors(double*, double*, double*, double*, float*, float*, float*);
 #endif

@@ -4,7 +4,7 @@
 #include "sensors.h"
 /*---Variables----------------------------------------------------------*/
 static States state = STANDBY;
-static double lat, lon;
+static double lat, lon, gpsAlt, gpsSats;
 
 static float barData[2];
 static float accelData[4];
@@ -35,7 +35,7 @@ void loop() {
     delta_time = new_time - old_time;
     old_time = new_time;
 
-    pollSensors(&lat, &lon, barData, accelData, magData);
+    pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData);
     calculateValues();
     stateMachine();
     }

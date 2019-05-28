@@ -62,7 +62,7 @@ void initSensors(){
   * @param  double lon - longitude
   * @return None
   */
-void pollSensors(double *lat, double *lon, float barData[], float accelData[], float magData[])
+void pollSensors(double *lat, double *lon, double *gpsAlt, double *gpsSats, float barData[], float accelData[], float magData[])
 {
     // Get GPS latitude and longitude
     while (SerialGPS.available() > 0) {
@@ -72,6 +72,8 @@ void pollSensors(double *lat, double *lon, float barData[], float accelData[], f
     // if (nextSerialTaskTs < millis()) { //// not sure if this condition is necessary 
     *lat = gps.location.lat();
     *lon = gps.location.lng();
+    *gpsAlt = gps.altitude.meters();
+    *gpsSats = gps.satellites.value();
     // may need delay (nextSerialTaskTs = millis() + TASK_SERIAL_RATE;)
     //}
     // end GPS

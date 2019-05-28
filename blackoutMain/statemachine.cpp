@@ -56,7 +56,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 				apogee_count++;
 				if (apogee_count >= APOGEE_CHECKS) {
 					switchState(state, DESCENT);
-          delay_start = millis(); // !!!!!!! TODO: check millis() works on esp !!!!!!!!! 
+          delay_start = millis();
 					apogee_count = 0;
 				}
 			} else {
@@ -96,6 +96,9 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			}
 			break;
 
+    // Alt. Hold will make drone hold alt. but not move, idea being if you lose
+    // GPS lock you dont want to keep flying so wait in place for reacquire 
+    // If GPS doesnt reacquire after some amount of time switch to landing state
 		// acquire GPS lock (!!IMPORTANT: calibrate GPS on startup !!)
 		case ALTHOLD:
 			holdAlt();
