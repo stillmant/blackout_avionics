@@ -3,9 +3,10 @@
 
 #include <Arduino.h>
 #include <HardwareSerial.h>
-#include <TinyGPS++.h>
-#include <Adafruit_BMP280.h>
-#include <MPU9250_asukiaaa.h>
+
+#include "TinyGPS++.h"
+#include "Adafruit_BMP280.h"
+#include "MPU9250_asukiaaa.h"
 
 /*Definitions----------------------------------------------------------*/
 #define TASK_SERIAL_RATE 100 // for GPS
@@ -49,7 +50,7 @@ void initSensors(){
     }
 
     // MPU9250
-    mpu9250.setWire(&Wire); // <-------(Unsure how this works on ESP)
+    mpu9250.setWire(&Wire); 
     mpu9250.beginAccel();
     mpu9250.beginMag();
 

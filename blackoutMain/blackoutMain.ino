@@ -2,18 +2,22 @@
 /*---Includes-----------------------------------------------------------*/
 #include "statemachine.h"
 #include "sensors.h"
+#include "calculations.h"
 /*---Variables----------------------------------------------------------*/
 static States state = STANDBY;
+static float alt, prev_alt, delta_alt, pressure, groundPressure, groundAlt, distToTrgt;
+
+// GPS
 static double lat, lon, gpsAlt, gpsSats;
 
+// GY-91
 static float barData[2];
 static float accelData[4];
 static float magData[4];
 
 /*---Functions----------------------------------------------------------*/
 void setup() {
-  // Initialize sensors
-  initSensors();
+  initSensors(); // Initialize sensors
 }
 
 void loop() {
@@ -36,8 +40,8 @@ void loop() {
     old_time = new_time;
 
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData);
-    calculateValues();
-    stateMachine();
+    crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time);
+    stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state);
     }
 
 }

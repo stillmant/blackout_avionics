@@ -10,7 +10,7 @@
 #define BMP_MOSI 11
 #define BMP_CS   10
 
-#ifdef _ESP32_HAL_I2C_H_
+#ifndef _ESP32_HAL_I2C_H_
 #define SDA_PIN 21
 #define SCL_PIN 22
 #endif
