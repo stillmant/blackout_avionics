@@ -6,6 +6,7 @@
 
 /*Definitions---------------------------------------------------------*/
 #define MILLISECONDS 1000
+
 // UBC Fountain Coordinates
 #define TRGT_LAT 49.264796   
 #define TRGT_LON -123.252810
