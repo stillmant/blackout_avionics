@@ -31,7 +31,7 @@ void switchState(States *curr_state, States new_state){
  * @param  States *state - current state
  * @return void.
  */
-void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, float *distToTrgt, States *state) {
+void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state) {
 	static int launch_count, apogee_count, deploy_count, release_count;
   static unsigned long delay_start;
 

@@ -5,10 +5,10 @@
 #include "calculations.h"
 /*---Variables----------------------------------------------------------*/
 static States state = STANDBY;
-static float alt, prev_alt, delta_alt, pressure, groundPressure, groundAlt, distToTrgt;
+static float alt, prev_alt, delta_alt, pressure, groundPressure, groundAlt;
 
 // GPS
-static double lat, lon, gpsAlt, gpsSats;
+static double lat, lon, gpsAlt, gpsSats, distToTrgt;
 
 // GY-91
 static float barData[2];
