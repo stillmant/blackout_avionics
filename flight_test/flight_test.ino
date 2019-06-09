@@ -96,7 +96,7 @@ void setup() {
 
   setChanVal(5,6540);   //ARMING - set AUX1 permantly at 2001 (100%) to stay armed
 
-  for (i = 0; i < PRESSURE_AVG_SET_SIZE; i++) // for moving average
+  for (int i = 0; i < PRESSURE_AVG_SET_SIZE; i++) // for moving average
     {
         pressure_set[i] = GROUND_PRESSURE;
     }
@@ -147,7 +147,7 @@ void loop() {
       
     }
     Serial.println(barData[0]);
-    Serial.println(pressure);
+//    Serial.println(average_pressure);
     Serial.println(alt);
     Serial.println(delta_alt);
     
