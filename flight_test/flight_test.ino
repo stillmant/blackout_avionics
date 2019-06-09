@@ -44,6 +44,8 @@ static float alt, prev_alt, delta_alt, pressure, groundPressure, groundAlt;
 // GPS
 static double lat, lon, gpsAlt, gpsSats, distToTrgt;
 
+static float pressure_set[PRESSURE_AVG_SET_SIZE];
+
 // GY-91
 static float barData[2];
 static float accelData[4];
@@ -93,6 +95,11 @@ void setup() {
   delay(5000);          //Wait 5 seconds for FC startup
 
   setChanVal(5,6540);   //ARMING - set AUX1 permantly at 2001 (100%) to stay armed
+
+  for (i = 0; i < PRESSURE_AVG_SET_SIZE; i++) // for moving average
+    {
+        pressure_set[i] = GROUND_PRESSURE;
+    }
 }
 
 void loop() {
@@ -111,7 +118,7 @@ void loop() {
     old_time = new_time;
 
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData);
-    crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time);
+    crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time, pressure_set);
     }
 
   new_time2 = millis();

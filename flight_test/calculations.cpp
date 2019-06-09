@@ -14,13 +14,35 @@
  */
 void crunchNumbers(float barData[], float accelData[], float magData[], 
                   float *pressure, float *groundPressure, float *prev_alt, float *alt, 
-                  float *delta_alt, double *lat, double *lon, double *distToTrgt, unsigned long *delta_time){
-    *pressure = barData[0];
+                  float *delta_alt, double *lat, double *lon, double *distToTrgt, unsigned long *delta_time, float *pressure_set){
+    
+    static float average_pressure;
+    addToPressureSet(pressure_set, barData[0]);
+    average_pressure = calculatePressureAverage(pressure_set);
+    
+    // *pressure = barData[0];
     *prev_alt = *alt;
-    *alt = 44330.0 * (1 - powf(*pressure / GROUND_PRESSURE, 1 / 5.255));
+    *alt = 44330.0 * (1 - powf(average_pressure / GROUND_PRESSURE, 1 / 5.255));
     *delta_alt = (*alt - *prev_alt) * MILLISECONDS / *delta_time;
 
     *distToTrgt = distanceToTarget(*lat, *lon);
+}
+
+void addToPressureSet(float* average_set, float data){
+    static int i = 0;
+    average_set[i] = data;
+    if(i >= PRESSURE_AVG_SET_SIZE - 1)
+        i = 0;
+    else
+        i++;
+}
+
+float calculatePressureAverage(float* average_set){
+    float sum = 0;
+    for(int i = 0; i < PRESSURE_AVG_SET_SIZE; i++){
+        sum = sum + average_set[i];
+    }
+    return sum / PRESSURE_AVG_SET_SIZE;
 }
 
 /*
