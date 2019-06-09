@@ -119,12 +119,12 @@ void loop() {
     delta_time2 = new_time2 - old_time2;
     old_time2 = new_time2;
     
-    buttonState = digitalRead(buttonPin);
+    buttonState = analogRead(buttonPin);
 
-    if (buttonState == LOW) {       //FAIL SAFE SWITCH
+    if (buttonState <= 4090) {       //FAIL SAFE SWITCH OFF
 
       setChanVal(5,3222);
-      Serial.println("OFF");
+      Serial.println("OFFFFFFFFFFFFFFFFFFFFFFF");
       
     } else {
 
@@ -139,6 +139,10 @@ void loop() {
       Serial.println("ON");
       
     }
+//    Serial.println(barData[0]);
+//    Serial.println(pressure);
+//    Serial.println(alt);
+//    Serial.println(delta_alt);
     
     }
 
