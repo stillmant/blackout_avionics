@@ -139,10 +139,10 @@ void loop() {
       Serial.println("ON");
       
     }
-//    Serial.println(barData[0]);
-//    Serial.println(pressure);
-//    Serial.println(alt);
-//    Serial.println(delta_alt);
+    Serial.println(barData[0]);
+    Serial.println(pressure);
+    Serial.println(alt);
+    Serial.println(delta_alt);
     
     }
 
