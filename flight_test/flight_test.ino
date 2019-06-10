@@ -20,6 +20,8 @@
 #define LAUNCH_THRESHOLD 50 // meters above ground
 #define CHUTE_RELEASE_ALT 550 // meters above ground TODO: run the numbers, see if 1 sec fall is ok
 
+#define HOVER_HEIGHT 2 // meters above ground
+
 // Timing delays
 #define SEPARATION_DELAY 3000 // ms (Free fall away from rocket for 3 sec before chute deploy)
 #define CHUTE_DROP_DELAY 1000 // ms (Free fall for 1 sec after chute relase)
@@ -32,7 +34,8 @@
 
 
  #define COUNT_LOW 3222     //999 = (0%)
- #define COUNT_HIGH 4870    //1500 = (50%)
+ #define COUNT_MID 4870    //1500 = (50%)
+ #define COUNT_HIGH 6520   //2001 = (100%)
 
 #include "esp32-hal-ledc.h"
 /*---Includes-----------------------------------------------------------*/
@@ -45,6 +48,7 @@ static float alt, prev_alt, delta_alt, pressure, groundPressure, groundAlt;
 static double lat, lon, gpsAlt, gpsSats, distToTrgt;
 
 static float pressure_set[PRESSURE_AVG_SET_SIZE];
+static float ground_pressure_set[PRESSURE_AVG_SET_SIZE];
 
 // GY-91
 static float barData[2];
@@ -62,6 +66,18 @@ uint8_t manual = 18;
 const int buttonPin = 27;
 int buttonState = 0; 
 
+//PID CONTROLLER VALUES
+double kp = 6;
+double ki = 0.5;
+double kd = 0.05;
+
+unsigned long currentTime, previousTime;
+double elapsedTime;
+double error;
+double lastError;
+double input, output, setPoint;
+double cumError, rateError;
+
 // Main channels: ROLL = 1, PITCH = 2, YAW = 3, THROTTLE = 4   -> 3 = THROTTLE
 void setChanVal(int channel, int val){
   ledcWrite(channel, val);
@@ -71,6 +87,18 @@ void setup() {
   Serial.begin(115200);
   delay(10);
   initSensors(); 
+
+  setPoint = HOVER_HEIGHT;         //Set desired alt for PID
+
+  //FINDING GROUND_PRESSURE
+//  for (int i = 0; i < PRESSURE_AVG_SET_SIZE; i++){
+//    pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData);
+//    addToPressureSet(ground_pressure_set, barData[0]);
+//    delay(50);
+//    Serial.println("Working...");
+//  }
+//  GROUND_PRESSURE = calculatePressureAverage(ground_pressure_set);
+//  
   
   pinMode(buttonPin, INPUT);
 
@@ -92,14 +120,30 @@ void setup() {
 
   setChanVal(5,3222);   //FOR ARMING - set THROT to 999 (0%), set AUX1 to 999 (0%)
   setChanVal(3,3222);
+
+  setChanVal(1,COUNT_MID);
+  setChanVal(2,COUNT_MID);
+  setChanVal(4,COUNT_MID);
+  setChanVal(6,COUNT_MID);
+  
   delay(5000);          //Wait 5 seconds for FC startup
 
   setChanVal(5,6540);   //ARMING - set AUX1 permantly at 2001 (100%) to stay armed
 
+  delay(500);
+
   for (int i = 0; i < PRESSURE_AVG_SET_SIZE; i++) // for moving average
     {
         pressure_set[i] = GROUND_PRESSURE;
-    }
+    } 
+
+//  float sum = 0;
+//  for (int i = 0; i < PRESSURE_AVG_SET_SIZE; i++){
+//    sum = sum + pressure_set[i];
+//  }
+//  GROUND_PRESSURE = sum / PRESSURE_AVG_SET_SIZE;
+//  Serial.print("Ground pressure: ");
+//  Serial.println(GROUND_PRESSURE);
 }
 
 void loop() {
@@ -128,21 +172,53 @@ void loop() {
     
     buttonState = analogRead(buttonPin);
 
-    if (buttonState <= 4090) {       //FAIL SAFE SWITCH OFF
+    if (buttonState <= 3800) {       //FAIL SAFE SWITCH OFF
 
-      setChanVal(5,3222);
+      setChanVal(5,COUNT_LOW);
       Serial.println("OFFFFFFFFFFFFFFFFFFFFFFF");
       
     } else {
 
-      if (i < COUNT_HIGH){
-      // put for loop contents here
-      setChanVal(3,i);
-      i = i + 10;
-    }
-      else{
-      i = COUNT_LOW;
-    }
+      input = alt;
+      output = computePID(input);
+      output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
+      output = constrain(output, COUNT_LOW, COUNT_MID);
+
+      setChanVal(3,output);
+
+////      if (alt < (HOVER_HEIGHT - 0.5)){      //BELOW HOVER_HEIGHT
+////        if (delta_alt <= 0.5){
+////          i = i + 10;
+////          setChanVal(3,i);
+////        }
+////      }
+////
+////      if ((HOVER_HEIGHT - 0.5) <= alt <= (HOVER_HEIGHT + 0.5)){   //WITHIN HOVER_HEIGHT
+////        if (delta_alt >= 0.5){
+////          i = i - 10;
+////          setChanVal(3,i);
+////        }
+////        if (delta_alt <= -0.5){
+////          i = i + 10;
+////          setChanVal(3,i);
+////        }
+////      }
+////
+////      if (alt > (HOVER_HEIGHT + 0.5)){      //ABOVE HOVER_HEIGHT
+////        if (delta_alt >= -0.5){
+////          i = i - 10;
+////          setChanVal(3,i);
+////        }
+////      }
+
+//      if (i < COUNT_HIGH){
+//      // put for loop contents here
+//      setChanVal(3,i);
+//      i = i + 10;
+//    }
+//      else{
+//      i = COUNT_LOW;
+//    }
       Serial.println("ON");
       
     }
@@ -150,6 +226,9 @@ void loop() {
 //    Serial.println(average_pressure);
     Serial.println(alt);
     Serial.println(delta_alt);
+    Serial.print("PID: ");
+    Serial.println(output);
+    Serial.println("---------------------------------");
     
     }
 
@@ -180,6 +259,23 @@ void loop() {
 //    setChanVal(6,i);
     
   }
+
+
+double computePID(double inp){     
+        currentTime = millis();                //get current time
+        elapsedTime = (double)(currentTime - previousTime);        //compute time elapsed from previous computation
+        
+        error = setPoint - inp;                                // determine error
+        cumError += error * elapsedTime;                // compute integral
+        rateError = (error - lastError)/elapsedTime;   // compute derivative
+ 
+        double out = kp*error + ki*cumError + kd*rateError;                //PID output               
+ 
+        lastError = error;                                //remember current error
+        previousTime = currentTime;                        //remember current time
+ 
+        return out;                                        //have function return the PID output
+}
 
 //  delay(500);
   // ESP = BetaFlight Value

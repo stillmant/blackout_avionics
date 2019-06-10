@@ -6,8 +6,8 @@
 
 /*Definitions---------------------------------------------------------*/
 #define MILLISECONDS 1000
-#define GROUND_PRESSURE 101959.05
-#define PRESSURE_AVG_SET_SIZE   15
+#define GROUND_PRESSURE 101902.59 
+#define PRESSURE_AVG_SET_SIZE   5
 
 // UBC Fountain Coordinates
 #define TRGT_LAT 49.264796   
