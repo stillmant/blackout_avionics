@@ -20,7 +20,7 @@
 #define LAUNCH_THRESHOLD 50 // meters above ground
 #define CHUTE_RELEASE_ALT 550 // meters above ground TODO: run the numbers, see if 1 sec fall is ok
 
-#define HOVER_HEIGHT 2 // meters above ground
+#define HOVER_HEIGHT 1.5 // meters above ground
 
 // Timing delays
 #define SEPARATION_DELAY 3000 // ms (Free fall away from rocket for 3 sec before chute deploy)
@@ -48,7 +48,7 @@ static float alt, prev_alt, delta_alt, pressure, groundPressure, groundAlt;
 static double lat, lon, gpsAlt, gpsSats, distToTrgt;
 
 static float pressure_set[PRESSURE_AVG_SET_SIZE];
-static float ground_pressure_set[PRESSURE_AVG_SET_SIZE];
+static float ground_pressure_set[GROUND_PRESSURE_AVG_SET_SIZE];
 
 // GY-91
 static float barData[2];
@@ -63,13 +63,13 @@ uint8_t throt = 4;
 uint8_t arm = 5;
 uint8_t manual = 18;
 
-const int buttonPin = 27;
+const int buttonPin = 26;
 int buttonState = 0; 
 
 //PID CONTROLLER VALUES
-double kp = 6;
-double ki = 0.5;
-double kd = 0.05;
+double kp = 50;
+double ki = 0.1;
+double kd = 2;
 
 unsigned long currentTime, previousTime;
 double elapsedTime;
@@ -91,14 +91,15 @@ void setup() {
   setPoint = HOVER_HEIGHT;         //Set desired alt for PID
 
   //FINDING GROUND_PRESSURE
-//  for (int i = 0; i < PRESSURE_AVG_SET_SIZE; i++){
-//    pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData);
-//    addToPressureSet(ground_pressure_set, barData[0]);
-//    delay(50);
-//    Serial.println("Working...");
-//  }
-//  GROUND_PRESSURE = calculatePressureAverage(ground_pressure_set);
-//  
+  for (int i = 0; i < GROUND_PRESSURE_AVG_SET_SIZE; i++){
+    pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData);
+    addToPressureSet(ground_pressure_set, barData[0]);
+    delay(50);
+    Serial.println("Working...");
+  }
+  groundPressure = calculatePressureAverage(ground_pressure_set);
+  Serial.println(groundPressure);
+  
   
   pinMode(buttonPin, INPUT);
 
@@ -163,6 +164,9 @@ void loop() {
 
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData);
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time, pressure_set);
+    distanceToTarget(lat, lon);
+    Serial.println(distanceToTarget(lat, lon));
+    
     }
 
   new_time2 = millis();
@@ -222,13 +226,13 @@ void loop() {
       Serial.println("ON");
       
     }
-    Serial.println(barData[0]);
+    //Serial.println(barData[0]);
 //    Serial.println(average_pressure);
-    Serial.println(alt);
-    Serial.println(delta_alt);
-    Serial.print("PID: ");
-    Serial.println(output);
-    Serial.println("---------------------------------");
+    //Serial.println(alt);
+    //Serial.println(delta_alt);
+    //Serial.print("PID: ");
+    //Serial.println(output);
+    //Serial.println("---------------------------------");
     
     }
 
