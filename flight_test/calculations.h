@@ -19,4 +19,5 @@ void crunchNumbers(float*, float*, float*, float*, float*, float*, float*, float
 void addToPressureSet(float*, float);
 float calculatePressureAverage(float*);
 double distanceToTarget(double, double);
+double targetBearing(double, double);
 #endif

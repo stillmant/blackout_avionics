@@ -166,6 +166,7 @@ void loop() {
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time, pressure_set);
     distanceToTarget(lat, lon);
     Serial.println(distanceToTarget(lat, lon));
+    Serial.println("mag horizontal direction " + String(magData[3])); //////////// <------- need to check what this is. Bearing? What units?
     
     }
 

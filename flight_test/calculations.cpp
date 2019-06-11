@@ -57,3 +57,14 @@ double distanceToTarget(double lat, double lon) {
             
     return (12742 * asin(sqrt(a))) * 1000; // in meters
 }
+
+/*
+ * @brief  Calculates bearing to target. Output in degrees!!
+ * @return double
+ */
+double targetBearing(double lat, double lon) {
+    double y = sin(TRGT_LON - lon) * cos(TRGT_LAT);
+    double x = (cos(lat) * sin(TRGT_LAT)) - (sin(lat) * cos(TRGT_LAT) * cos(TRGT_LON - lon));
+
+    return atan2(y, x)* (180.0 / 3.141592653589793); // in degrees
+}
