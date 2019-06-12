@@ -28,6 +28,8 @@
 
 #define SEA_PRESSURE 1013.25
 
+#define HOVER_TIME 30000 // ms (for flight testing purposes, time until commence landing function)
+
 // Polling times
 #define LANDED_POLLING_TIME_INTERVAL 5000 //ms
 #define NOMINAL_POLLING_TIME_INTERVAL 50  //ms
@@ -165,7 +167,10 @@ void loop() {
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData);
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time, pressure_set);
     distanceToTarget(lat, lon);
-    Serial.println(distanceToTarget(lat, lon));
+    //Serial.println(distanceToTarget(lat, lon));
+    Serial.println("x: " + String(magData[0]));
+    Serial.println("y: " + String(magData[1]));
+    Serial.println("z: " + String(magData[2]));
     Serial.println("mag horizontal direction " + String(magData[3])); //////////// <------- need to check what this is. Bearing? What units?
     
     }
@@ -184,37 +189,28 @@ void loop() {
       
     } else {
 
-      input = alt;
-      output = computePID(input);
-      output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
-      output = constrain(output, COUNT_LOW, COUNT_MID);
+      if (millis() <= HOVER_TIME) {
 
-      setChanVal(3,output);
+  //---------HOVER FUNCTION - USING PID CONTROL---------------
+        input = alt;
+        output = computePID(input);
+        output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
+        output = constrain(output, COUNT_LOW, COUNT_MID);
 
-////      if (alt < (HOVER_HEIGHT - 0.5)){      //BELOW HOVER_HEIGHT
-////        if (delta_alt <= 0.5){
-////          i = i + 10;
-////          setChanVal(3,i);
-////        }
-////      }
-////
-////      if ((HOVER_HEIGHT - 0.5) <= alt <= (HOVER_HEIGHT + 0.5)){   //WITHIN HOVER_HEIGHT
-////        if (delta_alt >= 0.5){
-////          i = i - 10;
-////          setChanVal(3,i);
-////        }
-////        if (delta_alt <= -0.5){
-////          i = i + 10;
-////          setChanVal(3,i);
-////        }
-////      }
-////
-////      if (alt > (HOVER_HEIGHT + 0.5)){      //ABOVE HOVER_HEIGHT
-////        if (delta_alt >= -0.5){
-////          i = i - 10;
-////          setChanVal(3,i);
-////        }
-////      }
+        setChanVal(3,output);
+  //----------------------------------------------------------
+        
+      }
+
+      else {
+
+       //------LANDING FUNCTION----------------
+        
+       //--------------------------------------
+        
+      }
+
+
 
 //      if (i < COUNT_HIGH){
 //      // put for loop contents here
@@ -224,6 +220,7 @@ void loop() {
 //      else{
 //      i = COUNT_LOW;
 //    }
+
       Serial.println("ON");
       
     }
