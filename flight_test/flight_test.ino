@@ -1,7 +1,7 @@
 /*
  * Reference
  * https://www.instructables.com/id/Interfacing-Servo-Motor-With-ESP32/
- * 
+ *
  * https://docs.espressif.com/projects/esp-idf/en/latest/api-reference/peripherals/dac.html
  * https://randomnerdtutorials.com/esp32-pwm-arduino-ide/
  * https://github.com/espressif/arduino-esp32/issues/4
@@ -23,6 +23,9 @@
 #define HOVER_HEIGHT 1.5 // meters above ground
 #define LANDING_VELOCITY 0.3 // m/s
 #define PRE_LANDING_HEIGHT 1 // meters
+#define FINAL_DESCENT_INCREMENT 0.05  // meters per time_interval2
+
+#define LAND_ACCEL_THRESHOLD 5 // g's
 
 // Timing delays
 #define SEPARATION_DELAY 3000 // ms (Free fall away from rocket for 3 sec before chute deploy)
@@ -68,23 +71,25 @@ uint8_t arm = 5;
 uint8_t manual = 18;
 
 const int buttonPin = 26;
-int buttonState = 0; 
+int buttonState = 0;
 
 //PID CONTROLLER VALUES for HOVER
 double kp = 50;
 double ki = 0.1;
 double kd = 2;
 //PID CONTROLLER VALUES for LANDING
-double kp2 = 50;
-double ki2 = 0.1;
-double kd2 = 2;
+// double kp2 = 50;
+// double ki2 = 0.1;
+// double kd2 = 2;
 
-unsigned long currentTime, previousTime, currentTime2, previousTime2;
-double elapsedTime, elapsedTime2;
-double error, error2;
-double lastError, lastError2;
-double input, output, setPoint, input2, output2, setPoint2;
-double cumError, rateError, cumError2, rateError2;
+unsigned long currentTime, previousTime;
+double elapsedTime;
+double error;
+double lastError;
+double input, output, setPointHover, setPointLandHeight, setPointFinalDescent;
+double cumError, rateError;
+
+// double currentTime2, previousTime2, elapsedTime2, error2, lastError2, input2, output2, setPoint2, cumError2, rateError2;
 
 // Main channels: ROLL = 1, PITCH = 2, YAW = 3, THROTTLE = 4   -> 3 = THROTTLE
 void setChanVal(int channel, int val){
@@ -94,10 +99,11 @@ void setChanVal(int channel, int val){
 void setup() {
   Serial.begin(115200);
   delay(10);
-  initSensors(); 
+  initSensors();
 
-  setPoint = HOVER_HEIGHT;          //Set desired alt for PID (HOVER)
-  setPoint2 = PRE_LANDING_HEIGHT;     //Set desired velocity for PID (LANDING)
+  setPointHover = HOVER_HEIGHT;          //Set desired alt for PID (HOVER)
+  setPointLandHeight = PRE_LANDING_HEIGHT;     //Set desired velocity for PID (LANDING)
+  setPointFinalDescent = PRE_LANDING_HEIGHT;
 
   //FINDING GROUND_PRESSURE
   for (int i = 0; i < GROUND_PRESSURE_AVG_SET_SIZE; i++){
@@ -108,8 +114,8 @@ void setup() {
   }
   groundPressure = calculatePressureAverage(ground_pressure_set);
   Serial.println(groundPressure);
-  
-  
+
+
   pinMode(buttonPin, INPUT);
 
   ledcAttachPin(roll, 1);
@@ -121,12 +127,12 @@ void setup() {
   ledcAttachPin(manual, 6);
 
   // ledcSetup(channel, Hz, 16-bit resolution)
-  ledcSetup(1, 50, 16); 
+  ledcSetup(1, 50, 16);
   ledcSetup(2, 50, 16);
   ledcSetup(3, 50, 16);
   ledcSetup(4, 50, 16);
   ledcSetup(5, 50, 16);
-  ledcSetup(6, 50, 16); 
+  ledcSetup(6, 50, 16);
 
   setChanVal(5,3222);   //FOR ARMING - set THROT to 999 (0%), set AUX1 to 999 (0%)
   setChanVal(3,3222);
@@ -135,7 +141,7 @@ void setup() {
   setChanVal(2,COUNT_MID);
   setChanVal(4,COUNT_MID);
   setChanVal(6,COUNT_MID);
-  
+
   delay(5000);          //Wait 5 seconds for FC startup
 
   setChanVal(5,6540);   //ARMING - set AUX1 permantly at 2001 (100%) to stay armed
@@ -145,7 +151,7 @@ void setup() {
   for (int i = 0; i < PRESSURE_AVG_SET_SIZE; i++) // for moving average
     {
         pressure_set[i] = GROUND_PRESSURE;
-    } 
+    }
 
 //  float sum = 0;
 //  for (int i = 0; i < PRESSURE_AVG_SET_SIZE; i++){
@@ -166,6 +172,7 @@ void loop() {
 
   static int i = COUNT_LOW;
   static int landCOUNTER = 0;
+  static bool landed = false;
 
   new_time = millis();
   if ((new_time - old_time) >= time_interval) {
@@ -180,124 +187,126 @@ void loop() {
     Serial.println("y: " + String(magData[1]));
     Serial.println("z: " + String(magData[2]));
     Serial.println("mag horizontal direction " + String(magData[3])); //////////// <------- need to check what this is. Bearing? What units?
-//    
     }
 
   new_time2 = millis();
   if ((new_time2 - old_time2) >= time_interval2) {
     delta_time2 = new_time2 - old_time2;
     old_time2 = new_time2;
-    
+
     buttonState = analogRead(buttonPin);
 
     if (buttonState <= 3800) {       //FAIL SAFE SWITCH OFF
 
       setChanVal(5,COUNT_LOW);
       Serial.println("OFFFFFFFFFFFFFFFFFFFFFFF");
-      
-    } else {
+
+    }
+    else if (landed == false) {
+      Serial.println("ON");
 
       if (millis() <= (HOVER_TIME + 5760)) {
 
   //---------HOVER FUNCTION - USING PID CONTROL---------------
         Serial.println("HOVER");
         input = alt;
-        output = computePID(input);
+        output = computePID(input, setPointHover);
         output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
         output = constrain(output, COUNT_LOW, COUNT_MID);
 
-        setChanVal(3,output);       
+        setChanVal(3,output);
   //----------------------------------------------------------
-        
+
       }
 
       else {
 
        //------LANDING FUNCTION----------------
-        
+
         if (landCOUNTER <= 200) {
 
           Serial.println("LANDING");
 
-//        input2 = delta_alt;
-//        Serial.println("Velocity: " + String(delta_alt));
-//        output2 = computePIDLand(input2);
-//        Serial.println("Output: " + String(output2));
-//        output2 = map(output2, -40000, 40000, COUNT_LOW, COUNT_MID);
-//        output2 = constrain(output2, COUNT_LOW, COUNT_MID);
-//
-//        setChanVal(3,output2);
+  //        input2 = delta_alt;
+  //        Serial.println("Velocity: " + String(delta_alt));
+  //        output2 = computePIDLand(input2);
+  //        Serial.println("Output: " + String(output2));
+  //        output2 = map(output2, -40000, 40000, COUNT_LOW, COUNT_MID);
+  //        output2 = constrain(output2, COUNT_LOW, COUNT_MID);
+  //
+  //        setChanVal(3,output2);
 
-        input2 = alt;
-        output2 = computePIDLand(input2);
-        output2 = map(output2, -40000, 40000, COUNT_LOW, COUNT_MID);
-        output2 = constrain(output2, COUNT_LOW, COUNT_MID);
+        // input2 = alt;
+        // output2 = computePIDLand(input2);
+        // output2 = map(output2, -40000, 40000, COUNT_LOW, COUNT_MID);
+        // output2 = constrain(output2, COUNT_LOW, COUNT_MID);
+        // setChanVal(3,output2);
 
-        setChanVal(3,output2);
+        input = alt;
+        output = computePID(input, setPointLandHeight);
+        output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
+        output = constrain(output, COUNT_LOW, COUNT_MID);
 
-        if ((PRE_LANDING_HEIGHT - 0.5) <= alt <= (PRE_LANDING_HEIGHT + 0.5)) {
+        setChanVal(3,output);
+
+        if (((PRE_LANDING_HEIGHT - 0.5) <= alt) && (alt <= (PRE_LANDING_HEIGHT + 0.5))) {
           landCOUNTER++;
         }
         else {
           landCOUNTER = 0;
         }
         Serial.println(landCOUNTER);
-        Serial.println(alt);  
+        Serial.println(alt);
         }
 
-      else {
+        else {
 
-        Serial.println("FINAL DECENT");       //Needs to use PID with changing target alt - Target Alt should incrementally lower (into negative alt), 
-        //Use accelerometer to detect bump when drone hits ground -> setChanVal(5, COUNT_LOW) when detected
-          
+          Serial.println("FINAL DECENT");
+
+          setPointFinalDescent = setPointFinalDescent - FINAL_DESCENT_INCREMENT;
+
+          input = alt;
+          output = computePID(input, setPointFinalDescent);
+          output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
+          output = constrain(output, COUNT_LOW, COUNT_MID);
+
+          setChanVal(3,output);
+
+          if (accelData[3] >= LAND_ACCEL_THRESHOLD){
+            setChanVal(5, COUNT_LOW);
+            landed = true;
+            Serial.println("LANDED, turn off");
+          }
+
         }
-        
-       //--------------------------------------
-        
       }
-
-
-
-//      if (i < COUNT_HIGH){
-//      // put for loop contents here
-//      setChanVal(3,i);
-//      i = i + 10;
-//    }
-//      else{
-//      i = COUNT_LOW;
-//    }
-
-      Serial.println("ON");
-      
     }
-    //Serial.println(barData[0]);
-//    Serial.println(average_pressure);
-    //Serial.println(alt);
-    //Serial.println(delta_alt);
-    //Serial.print("PID: ");
-    //Serial.println(output);
-    //Serial.println("---------------------------------");
-    
+
+    else{ // LANDED, keep motors at 0,
+      setChanVal(5, COUNT_LOW);
+      landed = true;
     }
+
+  }
 
 
 
 //  for (int i = COUNT_LOW; i < COUNT_HIGH; i=i+10){     //Slowly increases THROT from 0% to 50%
 //
 //    buttonState = digitalRead(buttonPin);    //Read state of switch (button)
-//    
+//
 //    if (buttonState == LOW) {       //FAIL SAFE SWITCH
 //
 //      setChanVal(6,3222);
 //      Serial.println("OFF");
-//      
+//
 //    } else {
 //
 //      setChanVal(3,i);
 //      Serial.println("ON");
-//      
+//
 //    }
-    
+
 //    setChanVal(1,i);
 //    setChanVal(2,i);
 //    setChanVal(3,i);
@@ -305,41 +314,41 @@ void loop() {
 
 //    setChanVal(5,i);
 //    setChanVal(6,i);
-    
+
   }
 
 
-double computePID(double inp){     
+double computePID(double inp, double setPoint){
         currentTime = millis();                //get current time
         elapsedTime = (double)(currentTime - previousTime);        //compute time elapsed from previous computation
-        
+
         error = setPoint - inp;                                // determine error
         cumError += error * elapsedTime;                // compute integral
         rateError = (error - lastError)/elapsedTime;   // compute derivative
- 
-        double out = kp*error + ki*cumError + kd*rateError;                //PID output               
- 
+
+        double out = kp*error + ki*cumError + kd*rateError;                //PID output
+
         lastError = error;                                //remember current error
         previousTime = currentTime;                        //remember current time
- 
+
         return out;                                        //have function return the PID output
 }
 
-double computePIDLand(double inp2){     
-        currentTime2 = millis();                //get current time
-        elapsedTime2 = (double)(currentTime2 - previousTime2);        //compute time elapsed from previous computation
-        
-        error2 = setPoint2 - inp2;                                // determine error
-        cumError2 += error2 * elapsedTime2;                // compute integral
-        rateError2 = (error2 - lastError2)/elapsedTime2;   // compute derivative
- 
-        double out2 = kp2*error2 + ki2*cumError2 + kd2*rateError2;                //PID output               
- 
-        lastError2 = error2;                                //remember current error
-        previousTime2 = currentTime2;                        //remember current time
- 
-        return out2;                                        //have function return the PID output
-}
+// double computePIDLand(double inp2){
+//         currentTime2 = millis();                //get current time
+//         elapsedTime2 = (double)(currentTime2 - previousTime2);        //compute time elapsed from previous computation
+
+//         error2 = setPoint2 - inp2;                                // determine error
+//         cumError2 += error2 * elapsedTime2;                // compute integral
+//         rateError2 = (error2 - lastError2)/elapsedTime2;   // compute derivative
+
+//         double out2 = kp2*error2 + ki2*cumError2 + kd2*rateError2;                //PID output
+
+//         lastError2 = error2;                                //remember current error
+//         previousTime2 = currentTime2;                        //remember current time
+
+//         return out2;                                        //have function return the PID output
+// }
 
 //  delay(500);
   // ESP = BetaFlight Value
@@ -348,7 +357,7 @@ double computePIDLand(double inp2){
   // 6520 = 2001 (100%)
 
   // 0% input
-//  setChanVal(1,3222); 
+//  setChanVal(1,3222);
 //  setChanVal(2,3222);
 //  setChanVal(3,3222);         //Sets THROT back to 0%
 //  setChanVal(4,3222);
@@ -356,9 +365,9 @@ double computePIDLand(double inp2){
 //  setChanVal(5,3222);
 //  setChanVal(6,3222);
 //  delay(2000);
-  
+
   // 50% input
-//  setChanVal(1,4870); 
+//  setChanVal(1,4870);
 //  setChanVal(2,4870);
 //  setChanVal(3,4870);
 //  setChanVal(4,4870);
@@ -366,9 +375,9 @@ double computePIDLand(double inp2){
 //  setChanVal(5,4870);
 //  setChanVal(6,4870);    //AUX2 needs to be at 1500 (For Safe flight mode - no flips/roll)
 //  delay(5000);
-  
+
   // 100% input
-//  setChanVal(1,6520); 
+//  setChanVal(1,6520);
 //  setChanVal(2,6520);
 //  setChanVal(3,6520);
 //  setChanVal(4,6520);
