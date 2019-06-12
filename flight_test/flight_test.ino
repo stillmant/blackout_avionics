@@ -22,6 +22,7 @@
 
 #define HOVER_HEIGHT 1.5 // meters above ground
 #define LANDING_VELOCITY 0.3 // m/s
+#define PRE_LANDING_HEIGHT 1 // meters
 
 // Timing delays
 #define SEPARATION_DELAY 3000 // ms (Free fall away from rocket for 3 sec before chute deploy)
@@ -29,7 +30,7 @@
 
 #define SEA_PRESSURE 1013.25
 
-#define HOVER_TIME 30000 // ms (for flight testing purposes, time until commence landing function)
+#define HOVER_TIME 5000 // ms (for flight testing purposes, time until commence landing function)
 
 // Polling times
 #define LANDED_POLLING_TIME_INTERVAL 5000 //ms
@@ -96,7 +97,7 @@ void setup() {
   initSensors(); 
 
   setPoint = HOVER_HEIGHT;          //Set desired alt for PID (HOVER)
-  setPoint2 = LANDING_VELOCITY;     //Set desired velocity for PID (LANDING)
+  setPoint2 = PRE_LANDING_HEIGHT;     //Set desired velocity for PID (LANDING)
 
   //FINDING GROUND_PRESSURE
   for (int i = 0; i < GROUND_PRESSURE_AVG_SET_SIZE; i++){
@@ -164,6 +165,7 @@ void loop() {
   static uint16_t time_interval = NOMINAL_POLLING_TIME_INTERVAL; //ms
 
   static int i = COUNT_LOW;
+  static int landCOUNTER = 0;
 
   new_time = millis();
   if ((new_time - old_time) >= time_interval) {
@@ -178,7 +180,7 @@ void loop() {
     Serial.println("y: " + String(magData[1]));
     Serial.println("z: " + String(magData[2]));
     Serial.println("mag horizontal direction " + String(magData[3])); //////////// <------- need to check what this is. Bearing? What units?
-    
+//    
     }
 
   new_time2 = millis();
@@ -195,15 +197,16 @@ void loop() {
       
     } else {
 
-      if (millis() <= HOVER_TIME) {
+      if (millis() <= (HOVER_TIME + 5760)) {
 
   //---------HOVER FUNCTION - USING PID CONTROL---------------
+        Serial.println("HOVER");
         input = alt;
         output = computePID(input);
         output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
         output = constrain(output, COUNT_LOW, COUNT_MID);
 
-        setChanVal(3,output);
+        setChanVal(3,output);       
   //----------------------------------------------------------
         
       }
@@ -211,12 +214,44 @@ void loop() {
       else {
 
        //------LANDING FUNCTION----------------
-        input2 = delta_alt;
+        
+        if (landCOUNTER <= 200) {
+
+          Serial.println("LANDING");
+
+//        input2 = delta_alt;
+//        Serial.println("Velocity: " + String(delta_alt));
+//        output2 = computePIDLand(input2);
+//        Serial.println("Output: " + String(output2));
+//        output2 = map(output2, -40000, 40000, COUNT_LOW, COUNT_MID);
+//        output2 = constrain(output2, COUNT_LOW, COUNT_MID);
+//
+//        setChanVal(3,output2);
+
+        input2 = alt;
         output2 = computePIDLand(input2);
         output2 = map(output2, -40000, 40000, COUNT_LOW, COUNT_MID);
         output2 = constrain(output2, COUNT_LOW, COUNT_MID);
 
         setChanVal(3,output2);
+
+        if ((PRE_LANDING_HEIGHT - 0.5) <= alt <= (PRE_LANDING_HEIGHT + 0.5)) {
+          landCOUNTER++;
+        }
+        else {
+          landCOUNTER = 0;
+        }
+        Serial.println(landCOUNTER);
+        Serial.println(alt);  
+        }
+
+      else {
+
+        Serial.println("FINAL DECENT");       //Needs to use PID with changing target alt - Target Alt should incrementally lower (into negative alt), 
+        //Use accelerometer to detect bump when drone hits ground -> setChanVal(5, COUNT_LOW) when detected
+          
+        }
+        
        //--------------------------------------
         
       }
