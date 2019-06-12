@@ -21,6 +21,7 @@
 #define CHUTE_RELEASE_ALT 550 // meters above ground TODO: run the numbers, see if 1 sec fall is ok
 
 #define HOVER_HEIGHT 1.5 // meters above ground
+#define LANDING_VELOCITY 0.3 // m/s
 
 // Timing delays
 #define SEPARATION_DELAY 3000 // ms (Free fall away from rocket for 3 sec before chute deploy)
@@ -68,17 +69,21 @@ uint8_t manual = 18;
 const int buttonPin = 26;
 int buttonState = 0; 
 
-//PID CONTROLLER VALUES
+//PID CONTROLLER VALUES for HOVER
 double kp = 50;
 double ki = 0.1;
 double kd = 2;
+//PID CONTROLLER VALUES for LANDING
+double kp2 = 50;
+double ki2 = 0.1;
+double kd2 = 2;
 
-unsigned long currentTime, previousTime;
-double elapsedTime;
-double error;
-double lastError;
-double input, output, setPoint;
-double cumError, rateError;
+unsigned long currentTime, previousTime, currentTime2, previousTime2;
+double elapsedTime, elapsedTime2;
+double error, error2;
+double lastError, lastError2;
+double input, output, setPoint, input2, output2, setPoint2;
+double cumError, rateError, cumError2, rateError2;
 
 // Main channels: ROLL = 1, PITCH = 2, YAW = 3, THROTTLE = 4   -> 3 = THROTTLE
 void setChanVal(int channel, int val){
@@ -90,7 +95,8 @@ void setup() {
   delay(10);
   initSensors(); 
 
-  setPoint = HOVER_HEIGHT;         //Set desired alt for PID
+  setPoint = HOVER_HEIGHT;          //Set desired alt for PID (HOVER)
+  setPoint2 = LANDING_VELOCITY;     //Set desired velocity for PID (LANDING)
 
   //FINDING GROUND_PRESSURE
   for (int i = 0; i < GROUND_PRESSURE_AVG_SET_SIZE; i++){
@@ -205,7 +211,12 @@ void loop() {
       else {
 
        //------LANDING FUNCTION----------------
-        
+        input2 = delta_alt;
+        output2 = computePIDLand(input2);
+        output2 = map(output2, -40000, 40000, COUNT_LOW, COUNT_MID);
+        output2 = constrain(output2, COUNT_LOW, COUNT_MID);
+
+        setChanVal(3,output2);
        //--------------------------------------
         
       }
@@ -277,6 +288,22 @@ double computePID(double inp){
         previousTime = currentTime;                        //remember current time
  
         return out;                                        //have function return the PID output
+}
+
+double computePIDLand(double inp2){     
+        currentTime2 = millis();                //get current time
+        elapsedTime2 = (double)(currentTime2 - previousTime2);        //compute time elapsed from previous computation
+        
+        error2 = setPoint2 - inp2;                                // determine error
+        cumError2 += error2 * elapsedTime2;                // compute integral
+        rateError2 = (error2 - lastError2)/elapsedTime2;   // compute derivative
+ 
+        double out2 = kp2*error2 + ki2*cumError2 + kd2*rateError2;                //PID output               
+ 
+        lastError2 = error2;                                //remember current error
+        previousTime2 = currentTime2;                        //remember current time
+ 
+        return out2;                                        //have function return the PID output
 }
 
 //  delay(500);
