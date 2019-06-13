@@ -110,11 +110,11 @@ void setup() {
   //FINDING GROUND_PRESSURE
   for (int i = 0; i < GROUND_PRESSURE_AVG_SET_SIZE; i++){
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData);
-    addToPressureSet(ground_pressure_set, barData[0]);
+    addToPressureSet(ground_pressure_set, barData[0], GROUND_PRESSURE_AVG_SET_SIZE);
     delay(50);
     Serial.println("Working...");
   }
-  groundPressure = calculatePressureAverage(ground_pressure_set);
+  groundPressure = calculateGroundPressureAverage(ground_pressure_set, GROUND_PRESSURE_AVG_SET_SIZE);
   Serial.println(groundPressure);
 
 
@@ -152,7 +152,7 @@ void setup() {
 
   for (int i = 0; i < PRESSURE_AVG_SET_SIZE; i++) // for moving average
     {
-        pressure_set[i] = GROUND_PRESSURE;
+        pressure_set[i] = groundPressure;
     }
 
 //  float sum = 0;
@@ -185,10 +185,10 @@ void loop() {
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time, pressure_set);
     distanceToTarget(lat, lon);
     //Serial.println(distanceToTarget(lat, lon));
-    Serial.println("x: " + String(magData[0]));
-    Serial.println("y: " + String(magData[1]));
-    Serial.println("z: " + String(magData[2]));
-    Serial.println("mag horizontal direction " + String(magData[3])); //////////// <------- need to check what this is. Bearing? What units?
+    // Serial.println("x: " + String(magData[0]));
+    // Serial.println("y: " + String(magData[1]));
+    // Serial.println("z: " + String(magData[2]));
+    // Serial.println("mag horizontal direction " + String(magData[3])); //////////// <------- need to check what this is. Bearing? What units?
     }
 
   new_time2 = millis();
@@ -211,13 +211,14 @@ void loop() {
       if (millis() <= (HOVER_TIME + 5760)) {
 
   //---------HOVER FUNCTION - USING PID CONTROL---------------
-        Serial.print("HOVER PID OUT: ");
+        Serial.println("HOVER");
         input = alt;
         output = computePID(input, setPointHover);
+        Serial.print(" PID OUT: ");
         Serial.print(output);
         output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
         output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
-        Serial.print(  "Mapped: ");
+        Serial.print("Mapped: ");
         Serial.println(output);
 
         setChanVal(3,output);
@@ -231,7 +232,7 @@ void loop() {
 
         if (landCOUNTER <= 200) {
 
-          Serial.print("LANDING PID: ");
+          Serial.println("LANDING");
 
   //        input2 = delta_alt;
   //        Serial.println("Velocity: " + String(delta_alt));
@@ -250,6 +251,7 @@ void loop() {
 
           input = alt;
           output = computePID(input, setPointLandHeight);
+          Serial.print(" PID OUT: ");
           Serial.print(output);
           output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
           output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
@@ -270,12 +272,13 @@ void loop() {
 
         else {
 
-          Serial.print("FINAL DECENT PID: ");
+          Serial.println("FINAL DECENT");
 
           setPointFinalDescent = setPointFinalDescent - FINAL_DESCENT_INCREMENT;
 
           input = alt;
           output = computePID(input, setPointFinalDescent);
+          Serial.print(" PID OUT: ");
           Serial.print(output);
           output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
           output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
@@ -337,7 +340,8 @@ double computePID(double inp, double setPoint){
         error = setPoint - inp;                                // determine error
         cumError += error * elapsedTime;                // compute integral
         rateError = (error - lastError)/elapsedTime;   // compute derivative
-
+        Serial.print("error: ");
+        Serial.print(error);
         double out = kp*error + ki*cumError + kd*rateError;                //PID output
 
         lastError = error;                                //remember current error
