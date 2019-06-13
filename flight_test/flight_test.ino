@@ -39,6 +39,8 @@
 #define LANDED_POLLING_TIME_INTERVAL 5000 //ms
 #define NOMINAL_POLLING_TIME_INTERVAL 50  //ms
 
+#define LOW_PID_OUT -40000
+#define HIGH_PID_OUT 40000
 
  #define COUNT_LOW 3222     //999 = (0%)
  #define COUNT_MID 4870    //1500 = (50%)
@@ -212,8 +214,8 @@ void loop() {
         Serial.println("HOVER");
         input = alt;
         output = computePID(input, setPointHover);
-        output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
-        output = constrain(output, COUNT_LOW, COUNT_MID);
+        output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
+        output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
 
         setChanVal(3,output);
   //----------------------------------------------------------
@@ -245,8 +247,8 @@ void loop() {
 
           input = alt;
           output = computePID(input, setPointLandHeight);
-          output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
-          output = constrain(output, COUNT_LOW, COUNT_MID);
+          output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
+          output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
 
           setChanVal(3,output);
 
@@ -268,8 +270,9 @@ void loop() {
 
           input = alt;
           output = computePID(input, setPointFinalDescent);
-          output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
-          output = constrain(output, COUNT_LOW, COUNT_MID);
+          output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
+          output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
+          // output = constrain(output, COUNT_LOW, COUNT_MID);
 
           setChanVal(3,output);
 
