@@ -211,11 +211,14 @@ void loop() {
       if (millis() <= (HOVER_TIME + 5760)) {
 
   //---------HOVER FUNCTION - USING PID CONTROL---------------
-        Serial.println("HOVER");
+        Serial.print("HOVER PID OUT: ");
         input = alt;
         output = computePID(input, setPointHover);
+        Serial.print(output);
         output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
         output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
+        Serial.print(  "Mapped: ");
+        Serial.println(output);
 
         setChanVal(3,output);
   //----------------------------------------------------------
@@ -228,7 +231,7 @@ void loop() {
 
         if (landCOUNTER <= 200) {
 
-          Serial.println("LANDING");
+          Serial.print("LANDING PID: ");
 
   //        input2 = delta_alt;
   //        Serial.println("Velocity: " + String(delta_alt));
@@ -247,8 +250,11 @@ void loop() {
 
           input = alt;
           output = computePID(input, setPointLandHeight);
+          Serial.print(output);
           output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
           output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
+          Serial.print("  Mapped: ");
+          Serial.println(output);
 
           setChanVal(3,output);
 
@@ -264,15 +270,17 @@ void loop() {
 
         else {
 
-          Serial.println("FINAL DECENT");
+          Serial.print("FINAL DECENT PID: ");
 
           setPointFinalDescent = setPointFinalDescent - FINAL_DESCENT_INCREMENT;
 
           input = alt;
           output = computePID(input, setPointFinalDescent);
+          Serial.print(output);
           output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
           output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
-          // output = constrain(output, COUNT_LOW, COUNT_MID);
+          Serial.print("  Mapped: ");
+          Serial.println(output);
 
           setChanVal(3,output);
 
