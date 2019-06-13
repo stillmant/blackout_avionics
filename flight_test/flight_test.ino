@@ -33,7 +33,7 @@
 
 #define SEA_PRESSURE 1013.25
 
-#define HOVER_TIME 5000 // ms (for flight testing purposes, time until commence landing function)
+#define HOVER_TIME 15000 // ms (for flight testing purposes, time until commence landing function)
 
 // Polling times
 #define LANDED_POLLING_TIME_INTERVAL 5000 //ms
@@ -70,7 +70,7 @@ uint8_t throt = 4;
 uint8_t arm = 5;
 uint8_t manual = 18;
 
-const int buttonPin = 26;
+const int buttonPin = 27;
 int buttonState = 0;
 
 //PID CONTROLLER VALUES for HOVER
@@ -195,6 +195,7 @@ void loop() {
     old_time2 = new_time2;
 
     buttonState = analogRead(buttonPin);
+    Serial.println(buttonState);
 
     if (buttonState <= 3800) {       //FAIL SAFE SWITCH OFF
 
@@ -242,21 +243,21 @@ void loop() {
         // output2 = constrain(output2, COUNT_LOW, COUNT_MID);
         // setChanVal(3,output2);
 
-        input = alt;
-        output = computePID(input, setPointLandHeight);
-        output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
-        output = constrain(output, COUNT_LOW, COUNT_MID);
+          input = alt;
+          output = computePID(input, setPointLandHeight);
+          output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
+          output = constrain(output, COUNT_LOW, COUNT_MID);
 
-        setChanVal(3,output);
+          setChanVal(3,output);
 
-        if (((PRE_LANDING_HEIGHT - 0.5) <= alt) && (alt <= (PRE_LANDING_HEIGHT + 0.5))) {
-          landCOUNTER++;
-        }
-        else {
-          landCOUNTER = 0;
-        }
-        Serial.println(landCOUNTER);
-        Serial.println(alt);
+          if (((PRE_LANDING_HEIGHT - 0.5) <= alt) && (alt <= (PRE_LANDING_HEIGHT + 0.5))) {
+            landCOUNTER++;
+          }
+          else {
+            landCOUNTER = 0;
+          }
+          Serial.println(landCOUNTER);
+          Serial.println(alt);
         }
 
         else {
