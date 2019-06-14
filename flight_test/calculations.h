@@ -23,6 +23,8 @@ void addToPressureSet(float*, float, int);
 float calculatePressureAverage(float*);
 float calculateGroundPressureAverage(float*, int);
 double distanceToTarget(double, double);
+// void addToGPSSet(double*, double);
+// double calculateAvgGPSvalue(float*);
 double latDiff(double);
 double targetBearing(double, double);
 #endif

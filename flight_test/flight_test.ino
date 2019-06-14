@@ -60,6 +60,8 @@ static double lat, lon, gpsAlt, gpsSats, distToTrgt;
 
 static float pressure_set[PRESSURE_AVG_SET_SIZE];
 static float ground_pressure_set[GROUND_PRESSURE_AVG_SET_SIZE];
+// static double lat_set[GPS_AVG_SET_SIZE];
+// static double lon_set[GPS_AVG_SET_SIZE];
 
 // GY-91
 static float barData[2];
