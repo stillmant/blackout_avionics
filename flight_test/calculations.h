@@ -10,10 +10,11 @@
 #define GROUND_PRESSURE 1013.25
 #define PRESSURE_AVG_SET_SIZE   5
 #define GROUND_PRESSURE_AVG_SET_SIZE   20
+#define GPS_AVG_SET_SIZE   5
 
 // UBC Fountain Coordinates
 #define TRGT_LAT 49.2603122
-#define TRGT_LON -123.2557651
+#define TRGT_LON -123.2557537 //Middle of grass outside LMRS
 
 /*Functions------------------------------------------------------------*/
 void crunchNumbers(float*, float*, float*, float*, float*, float*, float*, float*, double*, double*, double*, unsigned long*, float*);
@@ -22,5 +23,6 @@ void addToPressureSet(float*, float, int);
 float calculatePressureAverage(float*);
 float calculateGroundPressureAverage(float*, int);
 double distanceToTarget(double, double);
+double latDiff(double);
 double targetBearing(double, double);
 #endif

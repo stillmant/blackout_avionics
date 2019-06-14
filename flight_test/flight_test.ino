@@ -33,14 +33,16 @@
 
 #define SEA_PRESSURE 1013.25
 
-#define HOVER_TIME 30000 // ms (for flight testing purposes, time until commence landing function)
+#define HOVER_TIME 300000 // ms (for flight testing purposes, time until commence landing function)
 
 // Polling times
 #define LANDED_POLLING_TIME_INTERVAL 5000 //ms
 #define NOMINAL_POLLING_TIME_INTERVAL 50  //ms
 
-#define LOW_PID_OUT -3000 //-40000
-#define HIGH_PID_OUT 3000 //40000
+#define LOW_PID_OUT -3000 //-40000  //Throttle
+#define HIGH_PID_OUT 3000 //40000   //Throttle
+#define LOW_PID_OUT_P -3000         //Pitch
+#define HIGH_PID_OUT_P 3000         //Pitch
 
  #define COUNT_LOW 3222     //999 = (0%)
  #define COUNT_MID 4870    //1500 = (50%)
@@ -79,21 +81,21 @@ int buttonState = 0;
 double kp = 50;
 double ki = 0.2;
 double kd = 2;
-//double kp = 2;
-//double ki = 5;
-//double kd = 1;
+double kp_p = 2;
+double ki_p = 5;
+double kd_p = 1;
 //PID CONTROLLER VALUES for LANDING
 // double kp2 = 50;
 // double ki2 = 0.1;
 // double kd2 = 2;
 
-unsigned long currentTime, previousTime;
-double elapsedTime;
-double error;
-double lastError;
-double input, output, setPointHover, setPointLandHeight, setPointFinalDescent;
-double cumError, rateError;
-
+unsigned long currentTime, previousTime, currentTime_p, previousTime_p;
+double elapsedTime, elapsedTime_p;
+double error, error_p;
+double lastError, lastError_p;
+double input, output, setPointHover, setPointLandHeight, setPointFinalDescent, input_p, output_p, setPointLatDist;
+double cumError, rateError, cumError_p, rateError_p;
+double LatDist;
 // double currentTime2, previousTime2, elapsedTime2, error2, lastError2, input2, output2, setPoint2, cumError2, rateError2;
 
 // Main channels: ROLL = 1, PITCH = 2, YAW = 3, THROTTLE = 4   -> 3 = THROTTLE
@@ -109,6 +111,7 @@ void setup() {
   setPointHover = HOVER_HEIGHT;          //Set desired alt for PID (HOVER)
   setPointLandHeight = PRE_LANDING_HEIGHT;     //Set desired velocity for PID (LANDING)
   setPointFinalDescent = HOVER_HEIGHT; //PRE_LANDING_HEIGHT;
+  setPointLatDist = 0; //Set desired difference from Trgt lat for PID (pitch)
 
   //FINDING GROUND_PRESSURE
   for (int i = 0; i < GROUND_PRESSURE_AVG_SET_SIZE; i++){
@@ -177,7 +180,10 @@ void loop() {
 
   static int i = COUNT_LOW;
   static int landCOUNTER = 0;
+  static int latCOUNTER = 0;
   static bool landed = false;
+  static bool gps_lock = false;
+  static bool lat_arrived = false;
 
   new_time = millis();
   if ((new_time - old_time) >= time_interval) {
@@ -187,15 +193,26 @@ void loop() {
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData);
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time, pressure_set);
     distanceToTarget(lat, lon);
+    LatDist = latDiff(lat);
+
+    if (gpsSats >= 1) {
+      gps_lock = true;
+    }
+    else {
+      gps_lock = false;
+    }
     //Serial.println(distanceToTarget(lat, lon));
     // Serial.println("x: " + String(magData[0]));
     // Serial.println("y: " + String(magData[1]));
     // Serial.println("z: " + String(magData[2]));
     // Serial.println("mag horizontal direction " + String(magData[3])); //////////// <------- need to check what this is. Bearing? What units?
-    Serial.print("Accel: ");
-    Serial.println(accelData[3]);
+    //Serial.print("Accel: ");
+    //Serial.println(accelData[3]);
     }
 
+
+  if (gps_lock == true) {
+  
   new_time2 = millis();
   if ((new_time2 - old_time2) >= time_interval2) {
     delta_time2 = new_time2 - old_time2;
@@ -203,6 +220,9 @@ void loop() {
 
     buttonState = analogRead(buttonPin);
     //Serial.println(buttonState);
+    Serial.print("GPS LOCKED (sats): ");
+    Serial.println(gpsSats);
+    
 
     if (buttonState <= 3800) {       //FAIL SAFE SWITCH OFF
 
@@ -213,88 +233,64 @@ void loop() {
     else if (landed == false) {
       Serial.println("ON");
 
-      if (millis() <= (HOVER_TIME + 5760)) {
+      if (lat_arrived == false) {      //(millis() <= (HOVER_TIME + 5760)) {
 
   //---------HOVER FUNCTION - USING PID CONTROL---------------
         Serial.println("HOVER");
         input = alt;
         output = computePID(input, setPointHover);
-        Serial.print(" PID OUT: ");
-        Serial.print(output);
+        //Serial.print(" PID OUT: ");
+        //Serial.print(output);
         output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
         output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
-        Serial.print(" Mapped: ");
-        Serial.print(output);
-        Serial.print(" Alt: ");
-        Serial.println(alt);
+        //Serial.print(" Mapped: ");
+        //Serial.print(output);
+        //Serial.print(" Alt: ");
+        //Serial.println(alt);
 
         setChanVal(3,output);
   //----------------------------------------------------------
 
+  //---------PITCH FUNCTION - USING PID WITH LATITUDE-----------------
+
+        input_p = LatDist;
+        Serial.print(" Lat Diff: ");
+        Serial.print(LatDist,10);
+        output_p = computePIDpitch(input_p, setPointLatDist);
+        Serial.print(" PID OUT: ");
+        Serial.print(output_p);
+        output_p = constrain(output_p, LOW_PID_OUT_P, HIGH_PID_OUT_P);
+        output_p = map(output_p, LOW_PID_OUT_P, HIGH_PID_OUT_P, COUNT_LOW, COUNT_HIGH);
+        Serial.print(" Mapped: ");
+        Serial.println(output_p);
+        setChanVal(2, output_p);
+
+        if ((LatDist >= -0.00090) && (LatDist <= 0.00090)) {
+          latCOUNTER++;
+          if (latCOUNTER > 100) {
+            lat_arrived == true;
+          }
+        }
+        Serial.print("latCOUNTER: ");
+        Serial.println(latCOUNTER);
+  //-----------------------------------------------------------------
+
       }
 
       else {
-
-       //------LANDING FUNCTION----------------
-
-//        if (landCOUNTER <= 100) {
-//
-//          Serial.println("LANDING");
-//
-//  //        input2 = delta_alt;
-//  //        Serial.println("Velocity: " + String(delta_alt));
-//  //        output2 = computePIDLand(input2);
-//  //        Serial.println("Output: " + String(output2));
-//  //        output2 = map(output2, -40000, 40000, COUNT_LOW, COUNT_MID);
-//  //        output2 = constrain(output2, COUNT_LOW, COUNT_MID);
-//  //
-//  //        setChanVal(3,output2);
-//
-//        // input2 = alt;
-//        // output2 = computePIDLand(input2);
-//        // output2 = map(output2, -40000, 40000, COUNT_LOW, COUNT_MID);
-//        // output2 = constrain(output2, COUNT_LOW, COUNT_MID);
-//        // setChanVal(3,output2);
-//
-//          input = alt;
-//          output = computePID(input, setPointLandHeight);
-//          Serial.print(" PID OUT: ");
-//          Serial.print(output);
-//          output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
-//          output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
-//          Serial.print("  Mapped: ");
-//          Serial.print(output);
-//          //Serial.print(" Alt: ");
-//          //Serial.print(alt);
-//
-//          setChanVal(3,output);
-//
-//          if (((PRE_LANDING_HEIGHT - 1) <= alt) && (alt <= (PRE_LANDING_HEIGHT + 1))) {
-//            landCOUNTER++;
-//          }
-//          else {
-//            //landCOUNTER = 0;
-//          }
-//          Serial.print(" landCOUNTER: ");
-//          Serial.println(landCOUNTER);
-//          Serial.print(" Alt: ");
-//          Serial.println(alt);
-//        }
-
-//        else {
-
+//------------FINAL DECENT - incrementally lower target alt--------------------------
           Serial.println("FINAL DECENT");
 
           setPointFinalDescent = setPointFinalDescent - FINAL_DESCENT_INCREMENT;
 
           input = alt;
           output = computePID(input, setPointFinalDescent);
-          Serial.print(" PID OUT: ");
-          Serial.print(output);
+          //Serial.print(" PID OUT: ");
+          //Serial.print(output);
           output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
           output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
-          Serial.print("  Mapped: ");
-          Serial.println(output);
+          //Serial.print("  Mapped: ");
+          //Serial.println(output);
 
           setChanVal(3,output);
 
@@ -303,8 +299,7 @@ void loop() {
             landed = true;
             Serial.println("LANDED, turn off");
           }
-
-//        }
+//---------------------------------------------------------------------------------
       }
     }
 
@@ -314,32 +309,81 @@ void loop() {
     }
 
   }
+  }
 
 
+  else { //no gps_lock, HOVER
 
-//  for (int i = COUNT_LOW; i < COUNT_HIGH; i=i+10){     //Slowly increases THROT from 0% to 50%
-//
-//    buttonState = digitalRead(buttonPin);    //Read state of switch (button)
-//
-//    if (buttonState == LOW) {       //FAIL SAFE SWITCH
-//
-//      setChanVal(6,3222);
-//      Serial.println("OFF");
-//
-//    } else {
-//
-//      setChanVal(3,i);
-//      Serial.println("ON");
-//
-//    }
+    new_time2 = millis();
+  if ((new_time2 - old_time2) >= time_interval2) {
+    delta_time2 = new_time2 - old_time2;
+    old_time2 = new_time2;
 
-//    setChanVal(1,i);
-//    setChanVal(2,i);
-//    setChanVal(3,i);
-//    setChanVal(4,i);
+    buttonState = analogRead(buttonPin);
+    //Serial.println(buttonState);
+    Serial.print("NO GPS LOCK (sats): ");
+    Serial.println(gpsSats);
 
-//    setChanVal(5,i);
-//    setChanVal(6,i);
+    if (buttonState <= 3800) {       //FAIL SAFE SWITCH OFF
+
+      setChanVal(5,COUNT_LOW);
+      Serial.println("OFFFFFFFFFFFFFFFFFFFFFFF");
+
+    }
+    else if (landed == false) {
+      Serial.println("ON");
+
+    if (lat_arrived == false) {
+  //---------HOVER FUNCTION - USING PID CONTROL---------------
+        Serial.println("HOVER");
+        input = alt;
+        output = computePID(input, setPointHover);
+        //Serial.print(" PID OUT: ");
+        //Serial.print(output);
+        output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
+        output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
+        //Serial.print(" Mapped: ");
+        //Serial.print(output);
+        //Serial.print(" Alt: ");
+        //Serial.println(alt);
+
+        setChanVal(3,output);
+  //---------------------------------------------------------
+    }
+
+    else {
+
+      //------------FINAL DECENT - incrementally lower target alt--------------------------
+          Serial.println("FINAL DECENT");
+
+          setPointFinalDescent = setPointFinalDescent - FINAL_DESCENT_INCREMENT;
+
+          input = alt;
+          output = computePID(input, setPointFinalDescent);
+          //Serial.print(" PID OUT: ");
+          //Serial.print(output);
+          output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
+          output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
+          //Serial.print("  Mapped: ");
+          //Serial.println(output);
+
+          setChanVal(3,output);
+
+          if ((alt <= 0.5) && (setPointFinalDescent <= -15)){
+            setChanVal(5, COUNT_LOW);
+            landed = true;
+            Serial.println("LANDED, turn off");
+          }
+      //---------------------------------------------------------------------------------
+      
+    }
+
+    }
+
+  }
+    
+  }
+
 
   }
 
@@ -351,18 +395,34 @@ double computePID(double inp, double setPoint){
         error = setPoint - inp;                                // determine error
         cumError += error * elapsedTime;                // compute integral
         rateError = (error - lastError)/elapsedTime;   // compute derivative
-        Serial.print("error: ");
-        Serial.print(error);
-        Serial.print(" cumError: ");
-        Serial.print(cumError);
-        Serial.print(" rateError: ");
-        Serial.print(rateError);
+//        Serial.print("error: ");
+//        Serial.print(error);
+//        Serial.print(" cumError: ");
+//        Serial.print(cumError);
+//        Serial.print(" rateError: ");
+//        Serial.print(rateError);
         double out = kp*error + ki*cumError + kd*rateError;                //PID output
 
         lastError = error;                                //remember current error
         previousTime = currentTime;                        //remember current time
 
         return out;                                        //have function return the PID output
+}
+
+double computePIDpitch(double inp_p, double setPoint_p){
+        currentTime_p = millis() / 10;                //get current time
+        elapsedTime_p = (double)(currentTime_p - previousTime_p);        //compute time elapsed from previous computation
+
+        error_p = setPoint_p - inp_p;                                // determine error
+        cumError_p += error_p * elapsedTime_p;                // compute integral
+        rateError_p = (error_p - lastError_p)/elapsedTime_p;   // compute derivative
+
+        double out_p = kp_p*error_p + ki_p*cumError_p + kd_p*rateError_p;                //PID output
+
+        lastError_p = error_p;                                //remember current error
+        previousTime_p = currentTime_p;                        //remember current time
+
+        return out_p;                                        //have function return the PID output
 }
 
 // double computePIDLand(double inp2){
@@ -380,6 +440,10 @@ double computePID(double inp, double setPoint){
 
 //         return out2;                                        //have function return the PID output
 // }
+
+
+
+
 
 //  delay(500);
   // ESP = BetaFlight Value

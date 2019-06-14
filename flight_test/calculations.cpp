@@ -75,6 +75,10 @@ double distanceToTarget(double lat, double lon) {
     return (12742 * asin(sqrt(a))) * 1000; // in meters
 }
 
+double latDiff(double lat) {
+  return TRGT_LAT - lat;
+}
+
 /*
  * @brief  Calculates bearing to target. Output in degrees!!
  * @return double
