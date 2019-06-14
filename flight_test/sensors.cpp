@@ -55,6 +55,9 @@ void initSensors(){
     mpu9250.beginAccel();
     mpu9250.beginMag();
 
+    mpu9250.magXOffset = 28;
+    mpu9250.magYOffset = -39;
+
     return;
 }
 
