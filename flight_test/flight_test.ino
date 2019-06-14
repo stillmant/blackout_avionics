@@ -39,6 +39,8 @@
 #define LANDED_POLLING_TIME_INTERVAL 5000 //ms
 #define NOMINAL_POLLING_TIME_INTERVAL 50  //ms
 
+#define LOW_PID_OUT -40000
+#define HIGH_PID_OUT 40000
 
  #define COUNT_LOW 3222     //999 = (0%)
  #define COUNT_MID 4870    //1500 = (50%)
@@ -108,11 +110,11 @@ void setup() {
   //FINDING GROUND_PRESSURE
   for (int i = 0; i < GROUND_PRESSURE_AVG_SET_SIZE; i++){
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData);
-    addToPressureSet(ground_pressure_set, barData[0]);
+    addToPressureSet(ground_pressure_set, barData[0], GROUND_PRESSURE_AVG_SET_SIZE);
     delay(50);
     Serial.println("Working...");
   }
-  groundPressure = calculatePressureAverage(ground_pressure_set);
+  groundPressure = calculateGroundPressureAverage(ground_pressure_set, GROUND_PRESSURE_AVG_SET_SIZE);
   Serial.println(groundPressure);
 
 
@@ -150,7 +152,7 @@ void setup() {
 
   for (int i = 0; i < PRESSURE_AVG_SET_SIZE; i++) // for moving average
     {
-        pressure_set[i] = GROUND_PRESSURE;
+        pressure_set[i] = groundPressure;
     }
 
 //  float sum = 0;
@@ -183,10 +185,10 @@ void loop() {
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time, pressure_set);
     distanceToTarget(lat, lon);
     //Serial.println(distanceToTarget(lat, lon));
-    Serial.println("x: " + String(magData[0]));
-    Serial.println("y: " + String(magData[1]));
-    Serial.println("z: " + String(magData[2]));
-    Serial.println("mag horizontal direction " + String(magData[3])); //////////// <------- need to check what this is. Bearing? What units?
+    // Serial.println("x: " + String(magData[0]));
+    // Serial.println("y: " + String(magData[1]));
+    // Serial.println("z: " + String(magData[2]));
+    // Serial.println("mag horizontal direction " + String(magData[3])); //////////// <------- need to check what this is. Bearing? What units?
     }
 
   new_time2 = millis();
@@ -212,8 +214,12 @@ void loop() {
         Serial.println("HOVER");
         input = alt;
         output = computePID(input, setPointHover);
-        output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
-        output = constrain(output, COUNT_LOW, COUNT_MID);
+        Serial.print(" PID OUT: ");
+        Serial.print(output);
+        output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
+        output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
+        Serial.print("Mapped: ");
+        Serial.println(output);
 
         setChanVal(3,output);
   //----------------------------------------------------------
@@ -245,8 +251,12 @@ void loop() {
 
           input = alt;
           output = computePID(input, setPointLandHeight);
-          output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
-          output = constrain(output, COUNT_LOW, COUNT_MID);
+          Serial.print(" PID OUT: ");
+          Serial.print(output);
+          output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
+          output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
+          Serial.print("  Mapped: ");
+          Serial.println(output);
 
           setChanVal(3,output);
 
@@ -268,8 +278,12 @@ void loop() {
 
           input = alt;
           output = computePID(input, setPointFinalDescent);
-          output = map(output, -40000, 40000, COUNT_LOW, COUNT_MID);
-          output = constrain(output, COUNT_LOW, COUNT_MID);
+          Serial.print(" PID OUT: ");
+          Serial.print(output);
+          output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
+          output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
+          Serial.print("  Mapped: ");
+          Serial.println(output);
 
           setChanVal(3,output);
 
@@ -326,7 +340,8 @@ double computePID(double inp, double setPoint){
         error = setPoint - inp;                                // determine error
         cumError += error * elapsedTime;                // compute integral
         rateError = (error - lastError)/elapsedTime;   // compute derivative
-
+        Serial.print("error: ");
+        Serial.print(error);
         double out = kp*error + ki*cumError + kd*rateError;                //PID output
 
         lastError = error;                                //remember current error
