@@ -107,6 +107,11 @@ double latDiff(double lat) {
   return TRGT_LAT - lat;
 }
 
+double lonDiff(double lon) {
+  return TRGT_LON - lon;
+}
+
+
 /*
  * @brief  Calculates bearing to target. Output in degrees!!
  * @return double

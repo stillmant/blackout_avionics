@@ -13,8 +13,8 @@
 #define GPS_AVG_SET_SIZE   5
 
 // UBC Fountain Coordinates
-#define TRGT_LAT 49.2603122
-#define TRGT_LON -123.2557537 //Middle of grass outside LMRS
+#define TRGT_LAT 49.2603553
+#define TRGT_LON -123.2557735 //Middle of grass outside LMRS
 
 /*Functions------------------------------------------------------------*/
 void crunchNumbers(float*, float*, float*, float*, float*, float*, float*, float*, double*, double*, double*, unsigned long*, float*);
@@ -26,5 +26,6 @@ double distanceToTarget(double, double);
 // void addToGPSSet(double*, double);
 // double calculateAvgGPSvalue(float*);
 double latDiff(double);
+double lonDiff(double);
 double targetBearing(double, double);
 #endif
