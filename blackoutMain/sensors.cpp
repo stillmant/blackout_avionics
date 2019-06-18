@@ -10,13 +10,14 @@
 
 /*Definitions----------------------------------------------------------*/
 #define TASK_SERIAL_RATE 100 // for GPS
+#define SEA_PRESSURE 1031.25
 /*Set up---------------------------------------------------------------*/
 
 // GPS
 TinyGPSPlus gps;
 HardwareSerial SerialGPS(1);
 
-// GY-91 
+// GY-91
 MPU9250 mpu9250;
 Adafruit_BMP280 bmp; // I2C
 HardwareSerial SerialMPU(2);
@@ -30,7 +31,7 @@ uint32_t nextSerialTaskTs = 0; // for GPS
  */
 void initSensors(){
     SerialGPS.begin(9600, SERIAL_8N1, 16, 17); // GPS on pins 16 & 17
-    
+
     SerialMPU.begin(115200, SERIAL_8N1, 21, 22);
     SerialBMP.begin(115200, SERIAL_8N1, 21, 22);
 
@@ -50,9 +51,14 @@ void initSensors(){
     }
 
     // MPU9250
-    mpu9250.setWire(&Wire); 
+    mpu9250.setWire(&Wire);
     mpu9250.beginAccel();
     mpu9250.beginMag();
+
+
+    //in flight test, I'm not sure what it does
+    mpu9250.magXOffset = 28;
+    mpu9250.magYOffset = -39;
 
     return;
 }
@@ -63,14 +69,14 @@ void initSensors(){
   * @param  double lon - longitude
   * @return None
   */
-void pollSensors(double *lat, double *lon, double *gpsAlt, double *gpsSats, float barData[], float accelData[], float magData[])
+void pollSensors(double *lat, double *lon, double *gpsAlt, double *gpsSats, float barData[], float accelData[], float magData[], int *photo_resistor)
 {
     // Get GPS latitude and longitude
     while (SerialGPS.available() > 0) {
         gps.encode(SerialGPS.read());
     }
 
-    // if (nextSerialTaskTs < millis()) { //// not sure if this condition is necessary 
+    // if (nextSerialTaskTs < millis()) { //// not sure if this condition is necessary
     *lat = gps.location.lat();
     *lon = gps.location.lng();
     *gpsAlt = gps.altitude.meters();
@@ -80,9 +86,9 @@ void pollSensors(double *lat, double *lon, double *gpsAlt, double *gpsSats, floa
     // end GPS
 
     // IMU
-    
+
     // BMP280
-    barData[0] = bmp.readPressure(); 
+    barData[0] = bmp.readPressure();
     barData[1] = bmp.readAltitude(SEA_PRESSURE);
 
     // MPU950
@@ -97,5 +103,7 @@ void pollSensors(double *lat, double *lon, double *gpsAlt, double *gpsSats, floa
     magData[1] = mpu9250.magY();
     magData[2] = mpu9250.magZ();
     magData[3] = mpu9250.magHorizDirection();
+
+    *photo_resistor = analogRead(photo_resistor_pin);
 
 }

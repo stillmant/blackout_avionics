@@ -1,4 +1,4 @@
-/* 
+/*
  * Reference: UBC Rocket Avionics 2018/2019 code
  * Description: State machine for UBC Rocket BLACKOUT Payload Vehicle's states
  */
@@ -21,7 +21,7 @@ void switchState(States *curr_state, States new_state){
 }
 
 /* void stateMachine(float*, float*, float*, float*, float*, States*){}
- * @brief  The statemachine of BLACKOUT Payload Vehicle. 
+ * @brief  The statemachine of BLACKOUT Payload Vehicle.
  * @param  float *alt - current altitude
  * @param  float *delta_alt - change in altitude
  * @param  float *pressure - barometer pressure
@@ -69,7 +69,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			if ((millis() - delay_start) >= SEPARATION_DELAY) {
 				deploy_count++;
 				if (deploy_count >= DEPLOYMENT_CHECKS) {
-					deployChute(); // <--------------- TODO: Implement & test
+					//deployChute(); // <--------------- TODO: Implement & test
 					switchState(state, UNDERCHUTE);
 					deploy_count = 0;
 				}
@@ -80,12 +80,12 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 
 		// deploy rotors, spin up, check stability, fall to chute relese alt
 		case UNDERCHUTE:
-			deployRotors();	// <-----------------------TODO: Implement & test (spin up in this function?)
-			// TODO: check stability before chute release 
+			//deployRotors();	// <-----------------------TODO: Implement & test (spin up in this function?)
+			// TODO: check stability before chute release
 			if (*alt <= CHUTE_RELEASE_ALT) {
 				release_count++;
 				if (release_count >= CHUTE_RELEASE_CHECKS) {
-					relaseChute(); // <--------------- TODO: Implement & test
+					//relaseChute(); // <--------------- TODO: Implement & test
 					delay(CHUTE_DROP_DELAY);
 					// might want a command here to fly away from falling chute after release
 					switchState(state, ALTHOLD);
@@ -97,15 +97,19 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			break;
 
     // Alt. Hold will make drone hold alt. but not move, idea being if you lose
-    // GPS lock you dont want to keep flying so wait in place for reacquire 
+    // GPS lock you dont want to keep flying so wait in place for reacquire
     // If GPS doesnt reacquire after some amount of time switch to landing state
 		// acquire GPS lock (!!IMPORTANT: calibrate GPS on startup !!)
 		case ALTHOLD:
-			holdAlt();
-			getGPS(); // poll GPS? Might do this somewhere else
-			if (goodLock) {
-				switchState(state, FLIGHT);
-			}
+			//holdAlt();
+			//getGPS(); // poll GPS? Might do this somewhere else
+
+
+			// if (goodLock) {
+			// 	switchState(state, FLIGHT);
+			// }
+
+
 			break;
 
 		case FLIGHT:
