@@ -32,8 +32,9 @@ void switchState(States *curr_state, States new_state){
  * @return void.
  */
 void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state) {
-	static int launch_count, apogee_count, deploy_count, release_count;
-  static unsigned long delay_start;
+	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0;
+	static unsigned long delay_start;
+	static int mach_lock_count = 0, mach_count = 0, base_alt_counter = 0;
 
 	switch (*state) {
 		case STANDBY:
@@ -45,24 +46,55 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 				}
 			} else {
 				launch_count = 0;
-				*groundPressure = *pressure;
-				*groundAlt = 44330.0 * (1 - powf(*groundPressure / SEA_PRESSURE, 1 / 5.255)); // <-- TODO: Look into details of this calculation
+				base_alt_counter++;
+				if(base_alt_counter >= 20){
+					*groundPressure = *pressure;
+					*groundAlt = 44330.0 * (1 - powf(*groundPressure / SEA_PRESSURE, 1 / 5.255));
+					base_alt_counter = 0;
+				}
 			}
 			break;
 
 		// check for apogee
 		case ASCENT:
-			if (*delta_alt <= 0) {
-				apogee_count++;
-				if (apogee_count >= APOGEE_CHECKS) {
-					switchState(state, DESCENT);
-          delay_start = millis();
-					apogee_count = 0;
-				}
-			} else {
-				apogee_count = 0;
-			}
+		    if (*delta_altitude > MACH_THRESHOLD) {
+                mach_count++;
+                if (mach_count >= MACH_CHECKS) {
+                    switchState(state, MACH_LOCK);
+                    mach_count = 0;
+                }
+            }
+            else {
+                mach_count = 0;
+            }
+
+			// CHECK FOR PHOTORESISTOR AS APOGEE INSTEAD
+
+
+			// if (*delta_alt <= 0) {
+			// 	apogee_count++;
+			// 	if (apogee_count >= APOGEE_CHECKS) {
+			// 		switchState(state, DESCENT);
+          	// 		delay_start = millis();
+			// 		apogee_count = 0;
+			// 	}
+			// } else {
+			// 	apogee_count = 0;
+			// }
 			break;
+
+		case MACH_LOCK:
+			if ((*delta_altitude < MACH_LOCK_THRESHOLD) && (*delta_altitude < *prev_delta_altitude) ) {
+                mach_lock_count++;
+                if (mach_lock_count >= MACH_LOCK_CHECKS) {
+                    switchState(state, ASCENT);
+                    mach_lock_count = 0;
+                }
+            }
+            else {
+                mach_lock_count = 0;
+            }
+            break;
 
 		// Deploy drogue chute
 		case DESCENT:
