@@ -34,7 +34,7 @@ void switchState(States *curr_state, States new_state){
 void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state) {
 	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0;
 	static unsigned long delay_start;
-	static int mach_lock_count = 0, mach_count = 0, base_alt_counter = 0;
+	static int base_alt_counter = 0;
 
 	switch (*state) {
 		case STANDBY:
@@ -57,17 +57,6 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 
 		// check for apogee
 		case ASCENT:
-		    if (*delta_altitude > MACH_THRESHOLD) {
-                mach_count++;
-                if (mach_count >= MACH_CHECKS) {
-                    switchState(state, MACH_LOCK);
-                    mach_count = 0;
-                }
-            }
-            else {
-                mach_count = 0;
-            }
-
 			// CHECK FOR PHOTORESISTOR AS APOGEE INSTEAD
 
 
@@ -82,19 +71,6 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			// 	apogee_count = 0;
 			// }
 			break;
-
-		case MACH_LOCK:
-			if ((*delta_altitude < MACH_LOCK_THRESHOLD) && (*delta_altitude < *prev_delta_altitude) ) {
-                mach_lock_count++;
-                if (mach_lock_count >= MACH_LOCK_CHECKS) {
-                    switchState(state, ASCENT);
-                    mach_lock_count = 0;
-                }
-            }
-            else {
-                mach_lock_count = 0;
-            }
-            break;
 
 		// Deploy drogue chute
 		case DESCENT:

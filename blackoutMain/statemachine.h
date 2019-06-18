@@ -9,12 +9,6 @@
 #define CHUTE_RELEASE_CHECKS 3
 #define LAND_CHECKS 5
 
-// MACH LOCK:
-#define MACH_THRESHOLD 260 //in meters per second
-#define MACH_LOCK_THRESHOLD 240 //in meters per second
-#define MACH_CHECKS 3
-#define MACH_LOCK_CHECKS 20
-
 // Various thresholds/ event altitudes
 #define LAUNCH_THRESHOLD 50 // meters above ground
 #define CHUTE_RELEASE_ALT 550 // meters above ground TODO: run the numbers, see if 1 sec fall is ok
@@ -33,14 +27,13 @@
 enum States {
 	STANDBY,		// 0
 	ASCENT,			// 1
-	MACH_LOCK		// 2
-	DESCENT,		// 3
-	UNDERCHUTE,		// 4
-	ALTHOLD,		// 5
-	FLIGHT,			// 6
-	APPROACH,		// 7
-	LANDING,		// 8 <-- Might need a FINAL state (lower altitued a bit) between 6 & 7
-	LANDED 			// 9
+	DESCENT,		// 2
+	UNDERCHUTE,		// 3
+	ALTHOLD,		// 4
+	FLIGHT,			// 5
+	APPROACH,		// 6
+	LANDING,		// 7 <-- Might need a FINAL state (lower altitued a bit) between 6 & 7
+	LANDED 			// 8
 };
 
 /*---Functions-------*/
