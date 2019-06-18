@@ -14,6 +14,7 @@ static double lat, lon, gpsAlt, gpsSats, distToTrgt;
 static float barData[2];
 static float accelData[4];
 static float magData[4];
+static int photo_resistor;
 
 /*---Functions----------------------------------------------------------*/
 void setup() {
@@ -26,7 +27,7 @@ void loop() {
   static unsigned long new_time = 0; //ms
   unsigned long delta_time;
   static uint16_t time_interval = NOMINAL_POLLING_TIME_INTERVAL; //ms
-  
+
   if (state == LANDED){
     time_interval = LANDED_POLLING_TIME_INTERVAL;
   } else {
@@ -39,7 +40,7 @@ void loop() {
     delta_time = new_time - old_time;
     old_time = new_time;
 
-    pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData);
+    pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData, &photo_resistor);
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time);
     stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state);
     }
