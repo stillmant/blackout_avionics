@@ -24,7 +24,7 @@ void crunchNumbers(float barData[], float accelData[], float magData[],
     *delta_alt = (*alt - *prev_alt) * MILLISECONDS / *delta_time;
 }
 
-void addToPressureSet(float* average_set, float data){
+void addToPressureSet(float average_set[], float data){
     static int i = 0;
     average_set[i] = data;
     if(i >= PRESSURE_AVG_SET_SIZE - 1)
@@ -34,7 +34,7 @@ void addToPressureSet(float* average_set, float data){
 }
 
 // for ground pressure
-void addToPressureSet(float* average_set, float data, int set_size){
+void addToPressureSet(float average_set[], float data, int set_size){
     static int i = 0;
     average_set[i] = data;
     if(i >= set_size - 1)
@@ -43,7 +43,7 @@ void addToPressureSet(float* average_set, float data, int set_size){
         i++;
 }
 
-float calculatePressureAverage(float* average_set){
+float calculatePressureAverage(float average_set[]){
     float sum = 0;
     for(int i = 0; i < PRESSURE_AVG_SET_SIZE; i++){
         sum = sum + average_set[i];
@@ -51,7 +51,7 @@ float calculatePressureAverage(float* average_set){
     return sum / PRESSURE_AVG_SET_SIZE;
 }
 
-float calculateGroundPressureAverage(float* average_set, int set_size){
+float calculateGroundPressureAverage(float average_set[], int set_size){
     float sum = 0;
     for(int i = 0; i < GROUND_PRESSURE_AVG_SET_SIZE; i++){
         sum = sum + average_set[i];
