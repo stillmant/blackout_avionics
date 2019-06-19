@@ -9,7 +9,7 @@
 #define DEPLOYMENT_CHECKS 2
 #define CHUTE_RELEASE_CHECKS 5
 #define LAND_CHECKS 5
-#define PHOTO_RESISTOR_THRESHOLD 2048
+#define PHOTO_RESISTOR_THRESHOLD 350
 
 // Various thresholds/ event altitudes
 #define LAUNCH_THRESHOLD 150 // meters above ground
