@@ -94,15 +94,16 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 				rotors_deployed = true;
 			}
 			if (((millis() - chute_drop_time) >= ARM_MOTOR_DELAY) && rotors_armed == false){
-				// setChanVal(5,3222);   //FOR ARMING - set THROT to 999 (0%), set AUX1 to 999 (0%)
-  				// setChanVal(3,3222);
-				// setChanVal(1,COUNT_MID);
-				// setChanVal(2,COUNT_MID);
-				// setChanVal(4,COUNT_MID);
+				// Main channels: ROLL = 1, PITCH = 2, YAW = 3, THROTTLE = 4   -> 3 = THROTTLE, 4 = YAW
+				ledcWrite(5,3222);   //FOR ARMING - set THROT to 999 (0%), set AUX1 to 999 (0%)
+  				ledcWrite(3,3222);
+				ledcWrite(1,COUNT_MID);
+				ledcWrite(2,COUNT_MID);
+				ledcWrite(4,COUNT_MID);
 				rotors_armed = true;
 			}
 			if (((millis() - chute_drop_time) >= ARM_MOTOR_DELAY_2) && rotors_armed == true){
-				// setChanVal(5,6540);
+				ledcWrite(5,6540);
 				switchState(state, UNDERCHUTE);
 			}
 
