@@ -4,8 +4,9 @@
 /*---Constants-------*/
 // State switch checks
 #define LAUNCH_CHECKS 40
-#define APOGEE_CHECKS 10
-#define DEPLOYMENT_CHECKS 10
+#define APOGEE_CHECKS 5
+#define PHOTO_CHECKS 10
+#define DEPLOYMENT_CHECKS 2
 #define CHUTE_RELEASE_CHECKS 5
 #define LAND_CHECKS 5
 #define PHOTO_RESISTOR_THRESHOLD 2048
