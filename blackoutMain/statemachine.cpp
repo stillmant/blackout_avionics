@@ -94,7 +94,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			if ((millis() - delay_start) >= SEPARATION_DELAY) {
 				deploy_count++;
 				if (deploy_count >= DEPLOYMENT_CHECKS) {
-					//deployChute(); // <--------------- TODO: Implement & test
+					deployChute(); // <--------------- TODO: Implement & test
 					switchState(state, CHUTE_DELAY);
 					deploy_count = 0;
 					chute_drop_time = millis();
@@ -106,7 +106,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 
 		case CHUTE_DELAY:
 			if (((millis() - chute_drop_time) >= CHUTE_FLIGHT_DELAY) && rotors_deployed == false){
-				// deployRotors();  // <-----------------------TODO: Implement & test (spin up in this function?)
+				deployRotors();  // <-----------------------TODO: Implement & test (spin up in this function?)
 				rotors_deployed = true;
 			}
 			if (((millis() - chute_drop_time) >= ARM_MOTOR_DELAY) && rotors_armed == false){
@@ -129,6 +129,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			// TODO: check stability before chute release
 			if (*alt <= CHUTE_RELEASE_ALT) {
 				release_count++;
+
 				if (release_count >= CHUTE_RELEASE_CHECKS) {
 					releaseChute(); // <--------------- TODO: Implement & test
 					delay(CHUTE_DROP_DELAY);
@@ -148,6 +149,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 		case ALTHOLD:
 			if (*alt <= (setPointHover + HOVER_SLACK) && *alt >= (setPointHover - HOVER_SLACK)){
 				hover_count++;
+
 				if (hover_count > HOVER_COUNT_THRESHOLD){
 					switchState(state, LANDING);
 				}
@@ -155,15 +157,12 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			else{
 				hover_count = 0;
 			}
-
 			break;
 
 		case LANDING:
-			// PID LOWER setpoint
-
-			// check for accel bump ||
 			if(*alt <= GROUND_ALTITUDE_THRESHOLD){
 				float delta = *alt - old_altitude_landed;
+
 				if(millis() - old_time_landed >= LANDING_TIME_INTERVAL){
 					if(abs(delta) <= LAND_VELOCITY_THRESHOLD){
 						land_count++;
@@ -174,14 +173,11 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 					old_time_landed = millis();
 					old_altitude_landed = *alt;
 				}
+
 				if(accel_data[3] >= GROUND_FORCE_LAND_THRESHOLD || land_count >= LAND_CHECKS){
 					switchState(state, LANDED);
 				}
-
-
 			}
-
-
 			break;
 
 		case LANDED:
