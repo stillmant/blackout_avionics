@@ -245,10 +245,10 @@ void loop() {
   new_time_y = millis();
   //Serial.println(new_time_y - old_time_y);
   if ((new_time_y - old_time_y) >= time_interval_y) {
-    
+
     yaw_calbrt = true;
-    
-    
+
+
   }
 //-----------------------------------------------------------
 
@@ -269,7 +269,7 @@ void loop() {
           Serial.println("OFFFFFFFFFFFFFFFFFFFFFFF");
 
         }
-        
+
         else if (landed == false) {
 
 //---------HOVER FUNCTION - USING PID CONTROL---------------
@@ -308,18 +308,18 @@ void loop() {
           //   old_time_y = millis();
           //   yaw_calbrt = false;
           // }
-        
+
         }
 
         else if (landed == true) { // LANDED, keep motors at 0,
-        
+
           setChanVal(5, COUNT_LOW);
           landed = true;
 
-      
+
         }
-        
-    
+
+
         }
 
   }
@@ -328,7 +328,7 @@ void loop() {
   if ((gps_lock == true) && (yaw_calbrt == false)) {
   bearingCOUNTER = 0;
   new_time2 = millis();
-  
+
   if ((new_time2 - old_time2) >= time_interval2) {
     delta_time2 = new_time2 - old_time2;
     old_time2 = new_time2;
@@ -337,7 +337,7 @@ void loop() {
     //Serial.println(buttonState);
     Serial.print("GPS LOCKED (sats): ");
     Serial.println(gpsSats);
-    
+
 
     if (buttonState <= 3800) {       //FAIL SAFE SWITCH OFF
 
@@ -386,7 +386,7 @@ void loop() {
         if (latCOUNTER >= 1000) {
             lat_arrived = true;
           }
-        
+
         Serial.print("latCOUNTER: ");
         Serial.println(latCOUNTER);
   //-----------------------------------------------------------------
@@ -435,17 +435,17 @@ void loop() {
     }
 
     else if (landed == true) { // LANDED, keep motors at 0,
-        
+
           setChanVal(5, COUNT_LOW);
           landed = true;
-      
+
       }
 
 
 
     }
   }
-  
+
 
 
   else if ((gps_lock == false) && (yaw_calbrt == false)) { //no gps_lock, HOVER
@@ -511,20 +511,20 @@ void loop() {
             Serial.println("LANDED, turn off");
           }
       //---------------------------------------------------------------------------------
-      
+
     }
 
     }
 
     else if (landed == true) { // LANDED, keep motors at 0,
-        
+
           setChanVal(5, COUNT_LOW);
           landed = true;
-      
+
       }
 
   }
-    
+
   }
 
 

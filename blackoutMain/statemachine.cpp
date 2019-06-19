@@ -32,9 +32,12 @@ void switchState(States *curr_state, States new_state){
  * @param  States *state - current state
  * @return void.
  */
-void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state) {
-	static int launch_count, apogee_count, deploy_count, release_count;
-  static unsigned long delay_start;
+void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state, int *photo_resistor) {
+	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0;
+	static unsigned long delay_start;
+	static int base_alt_counter = 0;
+	static bool rotors_deployed = false, rotors_armed = false;
+	static int chute_drop_time;
 
 	switch (*state) {
 		case STANDBY:
@@ -46,19 +49,25 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 				}
 			} else {
 				launch_count = 0;
-				*groundPressure = *pressure;
-				*groundAlt = 44330.0 * (1 - powf(*groundPressure / SEA_PRESSURE, 1 / 5.255)); // <-- TODO: Look into details of this calculation
+				base_alt_counter++;
+				if(base_alt_counter >= 20){
+					*groundPressure = *pressure;
+					*groundAlt = 44330.0 * (1 - powf(*groundPressure / SEA_PRESSURE, 1 / 5.255));
+					base_alt_counter = 0;
+				}
 			}
 			break;
 
 		// check for apogee
 		case ASCENT:
-			if (*delta_alt <= 0) {
-				apogee_count++;
-				if (apogee_count >= APOGEE_CHECKS) {
-					switchState(state, DESCENT);
-          delay_start = millis();
-					apogee_count = 0;
+			// CHECK FOR PHOTORESISTOR AS APOGEE INSTEAD
+
+			if (*photo_resistor >= PHOTO_RESISTOR_THRESHOLD) {	// GREATER THAN
+			 	apogee_count++;
+			 	if (apogee_count >= APOGEE_CHECKS) {
+			 		switchState(state, DESCENT);
+          	 		delay_start = millis();
+			 		apogee_count = 0;
 				}
 			} else {
 				apogee_count = 0;
@@ -70,18 +79,37 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			if ((millis() - delay_start) >= SEPARATION_DELAY) {
 				deploy_count++;
 				if (deploy_count >= DEPLOYMENT_CHECKS) {
-					deployChute(); // <--------------- TODO: Implement & test
-					switchState(state, UNDERCHUTE);
+					//deployChute(); // <--------------- TODO: Implement & test
+					switchState(state, CHUTE_DELAY);
 					deploy_count = 0;
+					chute_drop_time = millis();
 				}
 			} else {
 				deploy_count = 0;
 			}
 			break;
 
-		// deploy rotors, spin up, check stability, fall to chute relese alt
+		case CHUTE_DELAY:
+			if (((millis() - chute_drop_time) >= CHUTE_FLIGHT_DELAY) && rotors_deployed == false){
+				// deployRotors();  // <-----------------------TODO: Implement & test (spin up in this function?)
+				rotors_deployed = true;
+			}
+			if (((millis() - chute_drop_time) >= ARM_MOTOR_DELAY) && rotors_armed == false){
+				// Main channels: ROLL = 1, PITCH = 2, YAW = 3, THROTTLE = 4   -> 3 = THROTTLE, 4 = YAW
+				ledcWrite(5,3222);   //FOR ARMING - set THROT to 999 (0%), set AUX1 to 999 (0%)
+  				ledcWrite(3,3222);
+				ledcWrite(1,COUNT_MID);
+				ledcWrite(2,COUNT_MID);
+				ledcWrite(4,COUNT_MID);
+				rotors_armed = true;
+			}
+			if (((millis() - chute_drop_time) >= ARM_MOTOR_DELAY_2) && rotors_armed == true){
+				ledcWrite(5,6540);
+				switchState(state, UNDERCHUTE);
+			}
+
+		// fall to chute release alt
 		case UNDERCHUTE:
-		//	deployRotors();	// <-----------------------TODO: Implement & test (spin up in this function?)
 			// TODO: check stability before chute release
 			if (*alt <= CHUTE_RELEASE_ALT) {
 				release_count++;
@@ -110,18 +138,20 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			// 	switchState(state, FLIGHT);
 			// }
 
-
 			break;
 
-		case FLIGHT:
-			// if close to tgt -> APPROACH
-			// if lose gps for more than 5 sec -> ALTHOLD
-			break;
-		case APPROACH:
-			break;
+		// case FLIGHT:
+		// 	// if close to tgt -> APPROACH
+		// 	// if lose gps for more than 5 sec -> ALTHOLD
+		// 	break;
+		// case APPROACH:
+		// 	break;
+
 		case LANDING:
 			break;
-		case LANDED:
-			break;
+
+
+		// case LANDED:
+		// 	break;
 	}
 }
