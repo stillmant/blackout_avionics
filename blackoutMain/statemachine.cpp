@@ -147,7 +147,6 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			break;
 
 		case LANDED:
-			// check for accel bump OR
 			break;
 	}
 }
