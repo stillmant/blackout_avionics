@@ -5,6 +5,7 @@
 
 /*Includes------------------------------------------------------------*/
 #include "statemachine.h"
+#include "deployment.h"
 
 #include <math.h>
 #include <Arduino.h>
@@ -69,7 +70,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			if ((millis() - delay_start) >= SEPARATION_DELAY) {
 				deploy_count++;
 				if (deploy_count >= DEPLOYMENT_CHECKS) {
-					//deployChute(); // <--------------- TODO: Implement & test
+					deployChute(); // <--------------- TODO: Implement & test
 					switchState(state, UNDERCHUTE);
 					deploy_count = 0;
 				}
@@ -80,12 +81,12 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 
 		// deploy rotors, spin up, check stability, fall to chute relese alt
 		case UNDERCHUTE:
-			//deployRotors();	// <-----------------------TODO: Implement & test (spin up in this function?)
+		//	deployRotors();	// <-----------------------TODO: Implement & test (spin up in this function?)
 			// TODO: check stability before chute release
 			if (*alt <= CHUTE_RELEASE_ALT) {
 				release_count++;
 				if (release_count >= CHUTE_RELEASE_CHECKS) {
-					//relaseChute(); // <--------------- TODO: Implement & test
+					releaseChute(); // <--------------- TODO: Implement & test
 					delay(CHUTE_DROP_DELAY);
 					// might want a command here to fly away from falling chute after release
 					switchState(state, ALTHOLD);
