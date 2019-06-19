@@ -34,7 +34,7 @@ void switchState(States *curr_state, States new_state){
  * @return void.
  */
 void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state, int *photo_resistor) {
-	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0;
+	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0, hover_count = 0;
 	static unsigned long delay_start;
 	static int base_alt_counter = 0;
 	static bool rotors_deployed = false, rotors_armed = false;
