@@ -5,6 +5,7 @@
 
 /*Includes------------------------------------------------------------*/
 #include "statemachine.h"
+#include "deployment.h"
 
 #include <math.h>
 #include <Arduino.h>
@@ -113,7 +114,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			if (*alt <= CHUTE_RELEASE_ALT) {
 				release_count++;
 				if (release_count >= CHUTE_RELEASE_CHECKS) {
-					//relaseChute(); // <--------------- TODO: Implement & test
+					releaseChute(); // <--------------- TODO: Implement & test
 					delay(CHUTE_DROP_DELAY);
 					// might want a command here to fly away from falling chute after release
 					switchState(state, ALTHOLD);

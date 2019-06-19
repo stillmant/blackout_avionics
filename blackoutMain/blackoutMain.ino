@@ -3,6 +3,7 @@
 #include "statemachine.h"
 #include "sensors.h"
 #include "calculations.h"
+#include "deployment.h"
 /*---Variables----------------------------------------------------------*/
 static States state = STANDBY;
 static float alt, prev_alt, delta_alt, pressure, groundPressure, groundAlt;
@@ -19,6 +20,7 @@ static int photo_resistor;
 /*---Functions----------------------------------------------------------*/
 void setup() {
   initSensors(); // Initialize sensors
+  initDeployment(); // Inititalize deployment event pins
 }
 
 void loop() {
