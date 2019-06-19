@@ -39,7 +39,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 	static bool rotors_deployed = false, rotors_armed = false;
 	static int chute_drop_time;
 	static uint32_t old_time_landed = millis();
-	float old_altitude_landed = *alt;
+	static float old_altitude_landed = *alt;
 	static int land_count = 0;
 
 	switch (*state) {
@@ -147,7 +147,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			// PID LOWER setpoint
 
 			// check for accel bump ||
-			if(*groundAlt <= GROUND_ALTITUDE_THRESHOLD){
+			if(*alt <= GROUND_ALTITUDE_THRESHOLD){
 				float delta = *alt - old_altitude_landed;
 				if(millis() - old_time_landed >= LANDING_TIME_INTERVAL){
 					if(abs(delta) <= LAND_VELOCITY_THRESHOLD){
