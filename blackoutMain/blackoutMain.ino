@@ -22,9 +22,13 @@ void setup() {
   Serial.begin(115200);
   initSensors(); // Initialize sensors
   initDeployment(); // Inititalize deployment event pins
+  delay(5000)
+  releaseChute();
 }
 
 void loop() {
+
+
   static unsigned long timestamp;
   static unsigned long old_time = 0; //ms
   static unsigned long new_time = 0; //ms
@@ -38,11 +42,14 @@ void loop() {
   }
   if(Serial.read() == 'd'){
     //deploy chute
+    Serial.println("deploy fired");
     deployChute();
   }
   if(Serial.read() == 'r'){
     //deploy release
+    Serial.println("Release fired");
     releaseChute();
+    Serial.println("Release fired");
   }
 
 
@@ -62,8 +69,7 @@ void loop() {
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData, &photo_resistor);
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time);
     stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state, &photo_resistor);
-    Serial.print("Time");
-    Serial.println(millis() - old_time);
+
     }
 
 }
