@@ -6,6 +6,7 @@
 /*Includes------------------------------------------------------------*/
 #include "statemachine.h"
 #include "deployment.h"
+#include "flight.h"
 
 #include <math.h>
 #include <Arduino.h>
@@ -33,7 +34,7 @@ void switchState(States *curr_state, States new_state){
  * @return void.
  */
 void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state, int *photo_resistor, float accel_data[]) {
-	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0;
+	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0, hover_count = 0;
 	static unsigned long delay_start;
 	static int base_alt_counter = 0;
 	static bool rotors_deployed = false, rotors_armed = false;
@@ -133,13 +134,15 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
     // If GPS doesnt reacquire after some amount of time switch to landing state
 		// acquire GPS lock (!!IMPORTANT: calibrate GPS on startup !!)
 		case ALTHOLD:
-			//holdAlt();
-			//getGPS(); // poll GPS? Might do this somewhere else
-
-
-			// if (goodLock) {
-			// 	switchState(state, FLIGHT);
-			// }
+			if (*alt <= (setPointHover + HOVER_SLACK) && *alt >= (setPointHover - HOVER_SLACK)){
+				hover_count++;
+				if (hover_count > HOVER_COUNT_THRESHOLD){
+					switchState(state, LANDING);
+				}
+			}
+			else{
+				hover_count = 0;
+			}
 
 			break;
 
