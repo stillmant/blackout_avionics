@@ -36,7 +36,7 @@ void switchState(States *curr_state, States new_state){
  */
 void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state, int *photo_resistor, float accel_data[], float ground_pressure_set[]) {
 	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0, hover_count = 0, photo_count = 0;
-	static unsigned long delay_start;
+	static unsigned long delay_start, hold_timeout;
 	static int base_alt_counter = 0;
 	static bool rotors_deployed = false, rotors_armed = false, apogee = false;
 	static int chute_drop_time;
@@ -136,6 +136,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 					// might want a command here to fly away from falling chute after release
 					switchState(state, ALTHOLD);
 					release_count = 0;
+					hold_timeout = millis();
 				}
 			} else {
 				release_count = 0;
@@ -156,6 +157,12 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			}
 			else{
 				hover_count = 0;
+			}
+
+			if ((millis() - hold_timeout) >= ALT_TIMEOUT){
+				ledcWrite(3, COUNT_LOW);
+				delay(HOLD_DELAY);
+				switchState(state, LANDING);
 			}
 			break;
 

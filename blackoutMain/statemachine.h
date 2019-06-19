@@ -11,6 +11,7 @@
 #define LAND_CHECKS 5
 #define PHOTO_RESISTOR_THRESHOLD 350
 
+
 // Various thresholds/ event altitudes
 #define LAUNCH_THRESHOLD 150 // meters above ground
 #define CHUTE_RELEASE_ALT 490 // meters above ground TODO: run the numbers, see if 1 sec fall is ok
@@ -23,6 +24,10 @@
 #define CHUTE_FLIGHT_DELAY 10000 // ms
 #define ARM_MOTOR_DELAY 12000
 #define ARM_MOTOR_DELAY_2 14000
+
+#define ALT_TIMEOUT 300000
+#define HOLD_DELAY 1000
+
 
 #define SEA_PRESSURE 101325	// pascals
 
