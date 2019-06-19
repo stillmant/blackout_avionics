@@ -25,6 +25,7 @@ static float ground_pressure_set[GROUND_PRESSURE_AVG_SET_SIZE];
 
 /*---Functions----------------------------------------------------------*/
 void setup() {
+  Serial.begin(115200);
   initSensors(); // Initialize sensors
   initDeployment(); // Inititalize deployment event pins
 
@@ -78,5 +79,18 @@ void loop() {
       ledcWrite(5, COUNT_LOW);
     }
   }
+  Serial.print("barometer: ");
+  Serial.println(barData[0]);
+  Serial.print("temp: ");
+  Serial.println(barData[1]);
+  Serial.print("Ground Altitude: ");
+  Serial.println(groundAlt);
+  Serial.print("Altitude: ");
+  Serial.println(alt);
+  Serial.print("Photoresistor: ");
+  Serial.println(photo_resistor);
+  Serial.print("Accel amg: ");
+  Serial.println(accelData[3]);
+
 
 }
