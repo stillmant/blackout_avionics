@@ -26,9 +26,9 @@
 // Timing delays
 #define SEPARATION_DELAY 1750 // ms (Free fall away from rocket for 3 sec before chute deploy)
 #define CHUTE_DROP_DELAY 1500 // ms (Free fall for 1 sec after chute relase)
-#define CHUTE_FLIGHT_DELAY 5000 // ms
-#define ARM_MOTOR_DELAY 7000
-#define ARM_MOTOR_DELAY_2 9000
+#define CHUTE_FLIGHT_DELAY 10000 // ms
+#define ARM_MOTOR_DELAY 12000
+#define ARM_MOTOR_DELAY_2 14000
 
 #define SEA_PRESSURE 101325	// pascals
 
