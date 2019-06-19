@@ -31,7 +31,7 @@ void loop() {
   if (state == LANDED){
     time_interval = LANDED_POLLING_TIME_INTERVAL;
   } else {
-    time_interval = NOMINAL_POLLING_TIME_INTERVAL;
+     time_interval = NOMINAL_POLLING_TIME_INTERVAL;
   }
 
 
@@ -42,7 +42,7 @@ void loop() {
 
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData, &photo_resistor);
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time);
-    stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state);
+    stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state, &photo_resistor);
     }
 
 }
