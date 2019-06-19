@@ -19,6 +19,7 @@ static int photo_resistor;
 
 /*---Functions----------------------------------------------------------*/
 void setup() {
+  Serial.begin(115200);
   initSensors(); // Initialize sensors
   initDeployment(); // Inititalize deployment event pins
 }
@@ -29,6 +30,21 @@ void loop() {
   static unsigned long new_time = 0; //ms
   unsigned long delta_time;
   static uint16_t time_interval = NOMINAL_POLLING_TIME_INTERVAL; //ms
+
+
+  if(Serial.read() == 'a'){
+    //deploy arms
+    deployRotors();
+  }
+  if(Serial.read() == 'd'){
+    //deploy chute
+    deployChute();
+  }
+  if(Serial.read() == 'r'){
+    releaseChute();
+  }
+
+
 
   if (state == LANDED){
     time_interval = LANDED_POLLING_TIME_INTERVAL;
