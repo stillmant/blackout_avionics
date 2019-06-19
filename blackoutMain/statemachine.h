@@ -27,6 +27,9 @@
 #define LANDED_POLLING_TIME_INTERVAL 5000 //ms
 #define NOMINAL_POLLING_TIME_INTERVAL 50  //ms
 
+#define GROUND_ALTITUDE_THRESHOLD 15
+#define GROUND_FORCE_LAND_THRESHOLD 4
+
 /*---Variables-------*/
 enum States {
 	STANDBY,		// 0
@@ -41,5 +44,5 @@ enum States {
 
 /*---Functions-------*/
 void changeState(States *curr_state, States new_state);
-void stateMachine(float*, float*, float*, float*, float*, double*, States*, int*);
+void stateMachine(float*, float*, float*, float*, float*, double*, States*, int*, float*);
 #endif

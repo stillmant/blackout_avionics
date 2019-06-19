@@ -32,12 +32,14 @@ void switchState(States *curr_state, States new_state){
  * @param  States *state - current state
  * @return void.
  */
-void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state, int *photo_resistor) {
+void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state, int *photo_resistor, accel_data[]) {
 	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0;
 	static unsigned long delay_start;
 	static int base_alt_counter = 0;
 	static bool rotors_deployed = false, rotors_armed = false;
 	static int chute_drop_time;
+	static uint32_t old_time_landed = millis();
+	float old_altitude_landed = *alt;
 
 	switch (*state) {
 		case STANDBY:
@@ -144,6 +146,15 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			// PID LOWER setpoint
 
 			// check for accel bump ||
+			if(*groundAlt <= GROUND_ALTITUDE_THRESHOLD){
+				if(accel_data[3] >= GROUND_FORCE_LAND_THRESHOLD ){
+
+
+				}
+
+			}
+
+
 			break;
 
 		case LANDED:
