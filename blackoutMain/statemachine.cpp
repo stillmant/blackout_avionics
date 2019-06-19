@@ -113,6 +113,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 				ledcWrite(5,6540);
 				switchState(state, UNDERCHUTE);
 			}
+			break;
 
 		// fall to chute release alt
 		case UNDERCHUTE:
