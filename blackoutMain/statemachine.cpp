@@ -131,10 +131,15 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
     // If GPS doesnt reacquire after some amount of time switch to landing state
 		// acquire GPS lock (!!IMPORTANT: calibrate GPS on startup !!)
 		case ALTHOLD:
-			//holdAlt();
-			//getGPS(); // poll GPS? Might do this somewhere else
-
-			// IF CONSTANT ALTITUDE GO TO LANDING
+			if (*alt <= (setPointHover + HOVER_SLACK) && *alt >= (setPointHover - HOVER_SLACK)){
+				hover_count++;
+				if (hover_count > HOVER_COUNT_THRESHOLD){
+					switchState(state, LANDING);
+				}
+			}
+			else{
+				hover_count = 0;
+			}
 
 			break;
 

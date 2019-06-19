@@ -14,8 +14,7 @@
 
 #define DESCENT_RATE_PER_SEC 0.5
 #define UPDATE_RATE_PER_SEC 20
-#define setPointHover 450
-
+#define setPointHover 460
 
 /* FUNCTIONS ---------------------------------------*/
 double runPIDhold(float *altitude);
