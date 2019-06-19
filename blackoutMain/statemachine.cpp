@@ -35,10 +35,10 @@ void switchState(States *curr_state, States new_state){
  * @return void.
  */
 void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state, int *photo_resistor, float accel_data[], float ground_pressure_set[]) {
-	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0, hover_count = 0;
+	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0, hover_count = 0, photo_count = 0;
 	static unsigned long delay_start;
 	static int base_alt_counter = 0;
-	static bool rotors_deployed = false, rotors_armed = false;
+	static bool rotors_deployed = false, rotors_armed = false, apogee = false;
 	static int chute_drop_time;
 	static uint32_t old_time_landed = millis();
 	static float old_altitude_landed = *alt;
@@ -66,17 +66,26 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 
 		// check for apogee
 		case ASCENT:
-			// ++ APOGEE CODE STILL
+			if (*delta_alt <= 0) {
+                apogee_count ++;
+                if (apogee_count >= APOGEE_CHECKS) {
+                    apogee = true;
+                    apogee_count = 0;
+                }
+            }
+            else {
+                apogee_count = 0;
+            }
 
-			if (*photo_resistor >= PHOTO_RESISTOR_THRESHOLD) {	// GREATER THAN
-			 	apogee_count++;
-			 	if (apogee_count >= APOGEE_CHECKS) {
+			if (*photo_resistor >= PHOTO_RESISTOR_THRESHOLD && apogee == true) {	// GREATER THAN
+			 	photo_count++;
+			 	if (photo_count >= PHOTO_CHECKS) {
 			 		switchState(state, DESCENT);
           	 		delay_start = millis();
-			 		apogee_count = 0;
+			 		photo_count = 0;
 				}
 			} else {
-				apogee_count = 0;
+				photo_count = 0;
 			}
 			break;
 
