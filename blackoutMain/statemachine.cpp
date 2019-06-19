@@ -140,18 +140,14 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 
 			break;
 
-		// case FLIGHT:
-		// 	// if close to tgt -> APPROACH
-		// 	// if lose gps for more than 5 sec -> ALTHOLD
-		// 	break;
-		// case APPROACH:
-		// 	break;
-
 		case LANDING:
+			// PID LOWER setpoint
+
+			// check for accel bump ||
 			break;
 
-
-		// case LANDED:
-		// 	break;
+		case LANDED:
+			// check for accel bump OR
+			break;
 	}
 }

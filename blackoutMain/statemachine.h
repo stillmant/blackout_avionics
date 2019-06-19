@@ -16,7 +16,7 @@
 
 // Timing delays
 #define SEPARATION_DELAY 1750 // ms (Free fall away from rocket for 3 sec before chute deploy)
-#define CHUTE_DROP_DELAY 3000 // ms (Free fall for 1 sec after chute relase)
+#define CHUTE_DROP_DELAY 1500 // ms (Free fall for 1 sec after chute relase)
 #define CHUTE_FLIGHT_DELAY 5000 // ms
 #define ARM_MOTOR_DELAY 7000
 #define ARM_MOTOR_DELAY_2 9000
@@ -35,10 +35,8 @@ enum States {
 	CHUTE_DELAY,	// 3
 	UNDERCHUTE,		// 4
 	ALTHOLD,		// 5
-	FLIGHT,			// 6
-	APPROACH,		// 7
-	LANDING,		// 8 <-- Might need a FINAL state (lower altitued a bit) between 6 & 7
-	LANDED 			// 9
+	LANDING,		// 6 <-- Might need a FINAL state (lower altitued a bit) between 6 & 7
+	LANDED 			// 7
 };
 
 /*---Functions-------*/
