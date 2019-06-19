@@ -19,10 +19,27 @@ static float accelData[4];
 static float magData[4];
 static int photo_resistor;
 
+// pressure arrays
+static float pressure_set[PRESSURE_AVG_SET_SIZE];
+static float ground_pressure_set[GROUND_PRESSURE_AVG_SET_SIZE];
+
 /*---Functions----------------------------------------------------------*/
 void setup() {
   initSensors(); // Initialize sensors
   initDeployment(); // Inititalize deployment event pins
+
+  for (int i = 0; i < GROUND_PRESSURE_AVG_SET_SIZE; i++){
+    pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData, &photo_resistor);
+    addToPressureSet(ground_pressure_set, barData[0], GROUND_PRESSURE_AVG_SET_SIZE);
+    delay(50);
+  }
+
+  groundPressure = calculateGroundPressureAverage(ground_pressure_set, GROUND_PRESSURE_AVG_SET_SIZE);
+
+  for (int i = 0; i < PRESSURE_AVG_SET_SIZE; i++) // for moving average
+  {
+      pressure_set[i] = groundPressure;
+  }
 }
 
 void loop() {
@@ -40,12 +57,13 @@ void loop() {
   }
 
   new_time = millis();
+
   if ((new_time - old_time) >= time_interval) {
     delta_time = new_time - old_time;
     old_time = new_time;
 
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData, &photo_resistor);
-    crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time);
+    crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &delta_time, pressure_set);
     stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state, &photo_resistor, accelData);
 
     if (state == ALTHOLD){

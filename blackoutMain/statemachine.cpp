@@ -64,7 +64,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 
 		// check for apogee
 		case ASCENT:
-			// CHECK FOR PHOTORESISTOR AS APOGEE INSTEAD
+			// ++ APOGEE CODE STILL
 
 			if (*photo_resistor >= PHOTO_RESISTOR_THRESHOLD) {	// GREATER THAN
 			 	apogee_count++;
