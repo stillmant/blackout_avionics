@@ -29,6 +29,9 @@
 
 #define GROUND_ALTITUDE_THRESHOLD 15
 #define GROUND_FORCE_LAND_THRESHOLD 4
+#define LAND_VELOCITY_THRESHOLD 3
+#define LAND_CHECKS 5
+#define LANDING_TIME_INTERVAL 10000
 
 /*---Variables-------*/
 enum States {
