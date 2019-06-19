@@ -8,8 +8,8 @@
 #define IGNITER_DELAY 15
 #define FREQUENCY 980 // maybe 980
 #define RESOLUTION 8
-#define PWM_DELAY 15
-#define PWM_STRENGTH 10 //out of 255
+#define PWM_DELAY 1000
+#define PWM_STRENGTH 20 //out of 255
 
 #define DEPLOY_CHANNEL 0
 #define RELEASE_CHANNEL 1
