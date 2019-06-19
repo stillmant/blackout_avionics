@@ -137,7 +137,6 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			// 	switchState(state, FLIGHT);
 			// }
 
-
 			break;
 
 		// case FLIGHT:

@@ -6,13 +6,13 @@
 #define LAUNCH_CHECKS 40
 #define APOGEE_CHECKS 10
 #define DEPLOYMENT_CHECKS 10
-#define CHUTE_RELEASE_CHECKS 3
+#define CHUTE_RELEASE_CHECKS 5
 #define LAND_CHECKS 5
 #define PHOTO_RESISTOR_THRESHOLD 2048
 
 // Various thresholds/ event altitudes
 #define LAUNCH_THRESHOLD 150 // meters above ground
-#define CHUTE_RELEASE_ALT 550 // meters above ground TODO: run the numbers, see if 1 sec fall is ok
+#define CHUTE_RELEASE_ALT 510 // meters above ground TODO: run the numbers, see if 1 sec fall is ok
 
 // Timing delays
 #define SEPARATION_DELAY 1750 // ms (Free fall away from rocket for 3 sec before chute deploy)
