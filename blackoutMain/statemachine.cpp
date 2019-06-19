@@ -176,7 +176,8 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 				hover_count++;
 
 				if (hover_count > HOVER_COUNT_THRESHOLD){
-					switchState(state, LANDING);
+					// switchState(state, LANDING);
+					hover_count = 0;
 				}
 			}
 			else{

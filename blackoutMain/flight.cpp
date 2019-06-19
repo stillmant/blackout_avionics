@@ -7,13 +7,13 @@
 #include <Arduino.h>
 
 //PID CONTROLLER VALUES for HOVER
-double kp = 50;
-double ki = 0.2;
-double kd = 3;
+double kp = 1;
+double ki = 0;
+double kd = 0;
 
-double runPIDhold(float *altitude){
+double runPIDhold(float *altitude, bool reset){
         double input = *altitude;
-        double output = computePID(input, setPointHover);
+        double output = computePID(input, setPointHover, reset);
         output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
         output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
         return output;
@@ -23,17 +23,23 @@ double runPIDland(float * altitude){
         static double setPointLand = setPointHover;
         double input = *altitude;
         setPointLand = (setPointLand - (DESCENT_RATE_PER_SEC/UPDATE_RATE_PER_SEC));
-        double output = computePID(input, setPointLand);
+        double output = computePID(input, setPointLand, false);
         output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
         output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_LOW, COUNT_MID);
         return output;
 }
 
-double computePID(double inp, double setPoint){
+double computePID(double inp, double setPoint, bool reset){
         static double elapsedTime, error = 0, cumError = 0, rateError = 0, lastError = 0;
         unsigned long currentTime;
         static unsigned long previousTime = millis() / 10;
 
+        if (reset){
+                // error = 0;
+                cumError = 0;
+                rateError = 0;
+                lastError = 0;
+        }
         currentTime = millis() / 10;                //get current time
         elapsedTime = (double)(currentTime - previousTime);        //compute time elapsed from previous computation
 
