@@ -1,9 +1,11 @@
 
 /*---Includes-----------------------------------------------------------*/
+#include "esp32-hal-ledc.h"
 #include "statemachine.h"
 #include "sensors.h"
 #include "calculations.h"
 #include "deployment.h"
+#include "flight.h"
 /*---Variables----------------------------------------------------------*/
 static States state = STANDBY;
 static float alt, prev_alt, delta_alt, pressure, groundPressure, groundAlt;
@@ -32,10 +34,10 @@ void loop() {
 
   if (state == LANDED){
     time_interval = LANDED_POLLING_TIME_INTERVAL;
+    // MOTORS TO ZERO
   } else {
      time_interval = NOMINAL_POLLING_TIME_INTERVAL;
   }
-
 
   new_time = millis();
   if ((new_time - old_time) >= time_interval) {
@@ -45,6 +47,17 @@ void loop() {
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData, &photo_resistor);
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &lat, &lon, &distToTrgt, &delta_time);
     stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state, &photo_resistor);
+
+    if (state == ALTHOLD){
+      // PID hold
+      runPIDhold();
     }
+    else if (state == LANDING){
+      runPIDland();
+    }
+    else if (state == LANDED){
+      // MOTORS TO ZERO
+    }
+  }
 
 }

@@ -6,6 +6,7 @@
 /*Includes------------------------------------------------------------*/
 #include "statemachine.h"
 #include "deployment.h"
+#include "flight.h"
 
 #include <math.h>
 #include <Arduino.h>
@@ -133,10 +134,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			//holdAlt();
 			//getGPS(); // poll GPS? Might do this somewhere else
 
-
-			// if (goodLock) {
-			// 	switchState(state, FLIGHT);
-			// }
+			// IF CONSTANT ALTITUDE GO TO LANDING
 
 			break;
 
