@@ -1,5 +1,5 @@
-#ifndef DEPLOYMENT
-#define DEPLOYMENT
+#ifndef DEPLOYMENT_H
+#define DEPLOYMENT_H
 
 #define ARMS_IGNITER_PIN 13
 #define CHUTE_DEPLOY_PIN 12
