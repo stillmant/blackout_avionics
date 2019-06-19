@@ -7,6 +7,7 @@
 #include "statemachine.h"
 #include "deployment.h"
 #include "flight.h"
+#include "calculations.h"
 
 #include <math.h>
 #include <Arduino.h>
@@ -33,7 +34,7 @@ void switchState(States *curr_state, States new_state){
  * @param  States *state - current state
  * @return void.
  */
-void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state, int *photo_resistor, float accel_data[]) {
+void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state, int *photo_resistor, float accel_data[], float ground_pressure_set[]) {
 	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0, hover_count = 0;
 	static unsigned long delay_start;
 	static int base_alt_counter = 0;
@@ -55,7 +56,8 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 				launch_count = 0;
 				base_alt_counter++;
 				if(base_alt_counter >= 20){
-					*groundPressure = *pressure;
+					addToPressureSet(ground_pressure_set, *alt, GROUND_PRESSURE_AVG_SET_SIZE);
+					*groundPressure = calculateGroundPressureAverage(ground_pressure_set, GROUND_PRESSURE_AVG_SET_SIZE);
 					*groundAlt = 44330.0 * (1 - powf(*groundPressure / SEA_PRESSURE, 1 / 5.255));
 					base_alt_counter = 0;
 				}
@@ -64,7 +66,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 
 		// check for apogee
 		case ASCENT:
-			// CHECK FOR PHOTORESISTOR AS APOGEE INSTEAD
+			// ++ APOGEE CODE STILL
 
 			if (*photo_resistor >= PHOTO_RESISTOR_THRESHOLD) {	// GREATER THAN
 			 	apogee_count++;
