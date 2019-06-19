@@ -65,19 +65,19 @@ void loop() {
 
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData, &photo_resistor);
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &delta_time, pressure_set);
-    stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state, &photo_resistor, accelData, ground_pressure_set);
+    //stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state, &photo_resistor, accelData, ground_pressure_set);
 
-    if (state == ALTHOLD){
-      PIDout = runPIDhold(&alt);
-      ledcWrite(3, PIDout);
-    }
-    else if (state == LANDING){
-      PIDout = runPIDland(&alt);
-      ledcWrite(3, PIDout);
-    }
-    else if (state == LANDED){
-      ledcWrite(5, COUNT_LOW);
-    }
+    // if (state == ALTHOLD){
+    //   PIDout = runPIDhold(&alt);
+    //   ledcWrite(3, PIDout);
+    // }
+    // else if (state == LANDING){
+    //   PIDout = runPIDland(&alt);
+    //   ledcWrite(3, PIDout);
+    // }
+    // else if (state == LANDED){
+    //   ledcWrite(5, COUNT_LOW);
+    // }
   }
   Serial.print("barometer: ");
   Serial.println(barData[0]);
