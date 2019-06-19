@@ -21,8 +21,11 @@ static int photo_resistor;
 
 /*---Functions----------------------------------------------------------*/
 void setup() {
+  Serial.begin(115200);
   initSensors(); // Initialize sensors
   initDeployment(); // Inititalize deployment event pins
+  ledcSetup(5, 50, 16);
+  checkPhotoRes();
 }
 
 void loop() {

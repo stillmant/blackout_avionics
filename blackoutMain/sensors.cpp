@@ -107,3 +107,36 @@ void pollSensors(double *lat, double *lon, double *gpsAlt, double *gpsSats, floa
     *photo_resistor = analogRead(photo_resistor_pin);
 
 }
+
+void checkPhotoRes(){
+    int res = analogRead(photo_resistor_pin);
+    ledcWrite(5, 6540);
+    delay(4000);
+    ledcWrite(5, 3222);
+    delay(4000);
+    ledcWrite(5, 0);
+    int ones = res%10;
+    int tens = (res%100)/10;
+    int hundreds = (res%1000)/100;
+    int thousands = res/1000;
+    int i;
+    for(i = 0; i < 5; i++){
+        for(i = 0; i < thousands; i++){
+            //beep
+        }
+        delay(2000);
+        for(i = 0; i < hundreds; i++){
+            //beep
+        }
+        delay(2000);
+        for(i = 0; i < tens; i++){
+            //beep
+        }
+        delay(2000);
+        for(i = 0; i < ones; i ++){
+            //beep
+        }
+        delay(5000);
+    }
+
+}

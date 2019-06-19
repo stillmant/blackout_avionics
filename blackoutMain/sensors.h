@@ -23,4 +23,5 @@
 void initSensors();
 
 void pollSensors(double*, double*, double*, double*, float*, float*, float*, int*);
+void checkPhotoRes();
 #endif
