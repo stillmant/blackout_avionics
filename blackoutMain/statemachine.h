@@ -11,11 +11,17 @@
 #define LAND_CHECKS 5
 #define PHOTO_RESISTOR_THRESHOLD 2048
 
+// mach checks
+#define MACH_THRESHOLD 225 //in meters per second
+#define MACH_LOCK_THRESHOLD 220 //in meters per second
+#define MACH_CHECKS 3
+#define MACH_LOCK_CHECKS 20
+
 // Various thresholds/ event altitudes
 #define LAUNCH_THRESHOLD 150 // meters above ground
 #define CHUTE_RELEASE_ALT 490 // meters above ground TODO: run the numbers, see if 1 sec fall is ok
-#define HOVER_COUNT_THRESHOLD 25
-#define HOVER_SLACK 2.5
+#define HOVER_COUNT_THRESHOLD 80
+#define HOVER_SLACK 1.5
 
 // Timing delays
 #define SEPARATION_DELAY 1750 // ms (Free fall away from rocket for 3 sec before chute deploy)
@@ -40,12 +46,13 @@
 enum States {
 	STANDBY,		// 0
 	ASCENT,			// 1
-	DESCENT,		// 2
-	CHUTE_DELAY,	// 3
-	UNDERCHUTE,		// 4
-	ALTHOLD,		// 5
-	LANDING,		// 6 <-- Might need a FINAL state (lower altitued a bit) between 6 & 7
-	LANDED 			// 7
+	MACH_LOCK,		// 2
+	DESCENT,		// 3
+	CHUTE_DELAY,	// 4
+	UNDERCHUTE,		// 5
+	ALTHOLD,		// 6
+	LANDING,		// 7 <-- Might need a FINAL state (lower altitued a bit) between 6 & 7
+	LANDED 			// 8
 };
 
 /*---Functions-------*/

@@ -7,7 +7,7 @@
 #include "deployment.h"
 #include "flight.h"
 /*---Variables----------------------------------------------------------*/
-static States state = STANDBY;
+static States state = ALTHOLD;
 static float alt, prev_alt, delta_alt, pressure, groundPressure, groundAlt;
 
 // GPS
