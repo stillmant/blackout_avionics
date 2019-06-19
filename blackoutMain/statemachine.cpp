@@ -147,7 +147,8 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 
 			// check for accel bump ||
 			if(*groundAlt <= GROUND_ALTITUDE_THRESHOLD){
-				if(accel_data[3] >= GROUND_FORCE_LAND_THRESHOLD ){
+				if()
+				if(accel_data[3] >= GROUND_FORCE_LAND_THRESHOLD || ){
 
 
 				}
