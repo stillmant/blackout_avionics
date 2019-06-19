@@ -31,10 +31,10 @@ void loop() {
   static unsigned long new_time = 0; //ms
   unsigned long delta_time;
   static uint16_t time_interval = NOMINAL_POLLING_TIME_INTERVAL; //ms
+  double PIDout;
 
   if (state == LANDED){
     time_interval = LANDED_POLLING_TIME_INTERVAL;
-    // MOTORS TO ZERO
   } else {
      time_interval = NOMINAL_POLLING_TIME_INTERVAL;
   }
@@ -49,14 +49,15 @@ void loop() {
     stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state, &photo_resistor);
 
     if (state == ALTHOLD){
-      // PID hold
-      runPIDhold();
+      PIDout = runPIDhold(&alt);
+      ledcWrite(3, PIDout);
     }
     else if (state == LANDING){
-      runPIDland();
+      PIDout = runPIDland(&alt);
+      ledcWrite(3, PIDout);
     }
     else if (state == LANDED){
-      // MOTORS TO ZERO
+      ledcWrite(5, COUNT_LOW);
     }
   }
 
