@@ -14,7 +14,7 @@
  */
 void crunchNumbers(float barData[], float accelData[], float magData[],
                   float *pressure, float *groundPressure, float *prev_alt, float *alt,
-                  float *delta_alt, unsigned long *delta_time, float *pressure_set){
+                  float *delta_alt, unsigned long *delta_time, float pressure_set[]){
 
     addToPressureSet(pressure_set, barData[0]);
     *pressure = calculatePressureAverage(pressure_set);
