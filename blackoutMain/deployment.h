@@ -5,7 +5,7 @@
 #define CHUTE_DEPLOY_PIN 12
 #define CHUTE_CUT_PIN 14
 
-#define IGNITER_DELAY 15
+#define IGNITER_DELAY 20
 #define FREQUENCY 980 // maybe 980
 #define RESOLUTION 8
 #define PWM_DELAY 1000

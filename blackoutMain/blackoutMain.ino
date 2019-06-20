@@ -61,7 +61,8 @@ void loop() {
   static unsigned long timestamp;
   static unsigned long old_time = 0; //ms
   static unsigned long new_time = 0; //ms
-  unsigned long delta_time;
+  static unsigned long old_PID_time = 0;
+  unsigned long delta_time, delta_PID_time;
   static uint16_t time_interval = NOMINAL_POLLING_TIME_INTERVAL; //ms
   double PIDout;
   static bool reset_PID = false;
@@ -81,18 +82,20 @@ void loop() {
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData, &photo_resistor);
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &delta_time, pressure_set);
     stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state, &photo_resistor, accelData, ground_pressure_set);
+  }
 
-    if (state == ALTHOLD){
-      PIDout = runPIDhold(&alt, reset_PID);
+  if ((new_time - old_PID_time) >= PID_UPDATE_TIME_INTERVAL) {
+    delta_PID_time = new_time - old_PID_time;
+    old_PID_time = new_time;
+
+    if (state == LANDING){
+      PIDout = runPIDland(&alt);
       ledcWrite(3, PIDout);
     }
-    else if (state == LANDING){
-      PIDout = runPIDland(&alt, reset_PID);
-      ledcWrite(3, PIDout);
-    }
-    else if (state == LANDED){
-      ledcWrite(5, COUNT_LOW);
-    }
+  }
+
+  if (state == LANDED){
+    ledcWrite(5, COUNT_LOW);
   }
 
 }

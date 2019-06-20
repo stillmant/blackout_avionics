@@ -7,7 +7,7 @@
 /*Definitions---------------------------------------------------------*/
 #define MILLISECONDS 1000
 
-#define PRESSURE_AVG_SET_SIZE   5
+#define PRESSURE_AVG_SET_SIZE   20
 #define GROUND_PRESSURE_AVG_SET_SIZE   20
 
 // UBC Fountain Coordinates
