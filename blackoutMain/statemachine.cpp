@@ -220,6 +220,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			break;
 
 		case LANDED:
+            ledcWrite(5, COUNT_LOW);
 			break;
 	}
 	prev_delta_altitude = *delta_alt;

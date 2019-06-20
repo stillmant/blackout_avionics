@@ -9,9 +9,6 @@
 /*---Variables----------------------------------------------------------*/
 static float alt, prev_alt, delta_alt, pressure, groundPressure, groundAlt;
 
-// int buttonState = 0;
-// #define buttonPin 34         //CHANGE TO RIGHT PIN
-
 // GPS
 static double lat, lon, gpsAlt, gpsSats, distToTrgt;
 
@@ -88,10 +85,6 @@ void loop() {
       PIDout = runPIDland(&alt);
       ledcWrite(3, PIDout);
     }
-  }
-
-  if (state == LANDED){
-    ledcWrite(5, COUNT_LOW);
   }
 
 }
