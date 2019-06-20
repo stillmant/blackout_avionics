@@ -83,11 +83,13 @@ void setup() {
 
   ledcWrite(5,6540);   //ARMING - set AUX1 permantly at 2001 (100%) to stay armed
 
+  Serial.println("GROUND PRESSURE: ");
+  Serial.println(groundPressure);
   delay(500);
 }
 
 void loop() {
-  static unsigned long timestamp;
+  static unsigned long timestamp, print_time, timetime;
   static unsigned long old_time = 0; //ms
   static unsigned long new_time = 0; //ms
   unsigned long delta_time;
@@ -105,6 +107,7 @@ void loop() {
   new_time = millis();
 
   if ((new_time - old_time) >= time_interval) {
+    print_time = millis();
     delta_time = new_time - old_time;
     old_time = new_time;
 
@@ -112,6 +115,8 @@ void loop() {
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &delta_time, pressure_set);
     stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state, &photo_resistor, accelData, ground_pressure_set);
 
+    Serial.print("accel mag: ");
+    Serial.println(accelData[3]);
     buttonState = analogRead(buttonPin);
     if (buttonState <= 3800 ){
       ledcWrite(5,COUNT_LOW);
@@ -122,12 +127,12 @@ void loop() {
       motor = false;
       delay_done = false;
       reset = true;
-      Serial.println("OFF");
+      // Serial.println("OFF");
     }
     else{
       // ledcWrite(5,6540);
       motor = true;
-      Serial.println("ARMED");
+      // Serial.println("ARMED");
     }
 
     if (motor == true){
@@ -157,6 +162,9 @@ void loop() {
       Serial.println("LANDED");
       ledcWrite(5, COUNT_LOW);
     }
+
+    timetime = millis() - print_time;
+    Serial.print(timetime);
   }
 
 }
