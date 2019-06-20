@@ -4,6 +4,14 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 
+uint8_t roll = 0;
+uint8_t pitch = 15;
+uint8_t yaw = 2;
+uint8_t throt = 4;
+
+uint8_t arm = 5;
+uint8_t manual = 18;
+
 void initChannels(){
 
     // FLIGHT CONTROLLER SETUP

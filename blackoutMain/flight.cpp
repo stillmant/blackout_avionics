@@ -34,7 +34,7 @@ double computePID(double inp, double setPoint, bool reset_PID){
         unsigned long currentTime;
         static unsigned long previousTime = millis() / 10;
 
-        if (reset){
+        if (reset_PID){
                 cumError = 0;
                 rateError = 0;
                 lastError = 0;

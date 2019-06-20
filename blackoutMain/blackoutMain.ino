@@ -10,14 +10,6 @@
 static States state = STANDBY;
 static float alt, prev_alt, delta_alt, pressure, groundPressure, groundAlt;
 
-uint8_t roll = 0;
-uint8_t pitch = 15;
-uint8_t yaw = 2;
-uint8_t throt = 4;
-
-uint8_t arm = 5;
-uint8_t manual = 18;
-
 // int buttonState = 0;
 // #define buttonPin 34         //CHANGE TO RIGHT PIN
 
