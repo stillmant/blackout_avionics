@@ -7,7 +7,6 @@
 #include "deployment.h"
 #include "flight.h"
 /*---Variables----------------------------------------------------------*/
-static States state = STANDBY;
 static float alt, prev_alt, delta_alt, pressure, groundPressure, groundAlt;
 
 // int buttonState = 0;
@@ -28,18 +27,14 @@ static float ground_pressure_set[GROUND_PRESSURE_AVG_SET_SIZE];
 
 /*---Functions----------------------------------------------------------*/
 void setup() {
+  delay(1000);
+
   initSensors(); // Initialize sensors
   initDeployment(); // Inititalize deployment event pins
   initChannels(); // Initialize channels for flight controller
+  delay(1000);
 
-  ledcWrite(5,3222);   //FOR ARMING - set THROT to 999 (0%), set AUX1 to 999 (0%)
-  ledcWrite(3,3222);
-
-  ledcWrite(1,COUNT_MID);
-  ledcWrite(2,COUNT_MID);
-  ledcWrite(4,COUNT_MID);
-  ledcWrite(6,COUNT_MID);
-
+  initFC(); // initializes flight controller vars
   delay(5000);          //Wait 5 seconds for FC startup
 
   for (int i = 0; i < GROUND_PRESSURE_AVG_SET_SIZE; i++){
@@ -58,6 +53,7 @@ void setup() {
 }
 
 void loop() {
+  static States state = STANDBY;
   static unsigned long timestamp;
   static unsigned long old_time = 0; //ms
   static unsigned long new_time = 0; //ms

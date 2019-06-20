@@ -91,7 +91,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
                 apogee_count = 0;
             }
 
-			if (*photo_resistor >= PHOTO_RESISTOR_THRESHOLD){	// apogee == true) {	// GREATER THAN
+			if (*photo_resistor >= PHOTO_RESISTOR_THRESHOLD){
 			 	photo_count++;
 			 	if (photo_count >= PHOTO_CHECKS) {
 			 		photo_trigger = true;
@@ -125,7 +125,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 			if ((millis() - delay_start) >= SEPARATION_DELAY) {
 				deploy_count++;
 				if (deploy_count >= DEPLOYMENT_CHECKS) {
-					deployChute(); // <--------------- TODO: Implement & test
+					deployChute();
 					switchState(state, CHUTE_DELAY);
 					rotors_deployed = false;
 					rotors_armed = false;
@@ -139,12 +139,12 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 
 		case CHUTE_DELAY:
 			if (((millis() - chute_drop_time) >= CHUTE_FLIGHT_DELAY) && rotors_deployed == false){
-				deployRotors();  // <-----------------------TODO: Implement & test (spin up in this function?)
+				deployRotors();
 				rotors_deployed = true;
 			}
 			if (((millis() - chute_drop_time) >= ARM_MOTOR_DELAY) && rotors_armed == false){
 				// Main channels: ROLL = 1, PITCH = 2, YAW = 3, THROTTLE = 4   -> 3 = THROTTLE, 4 = YAW
-				ledcWrite(5,3222);   //FOR ARMING - set THROT to 999 (0%), set AUX1 to 999 (0%)
+				ledcWrite(5,3222);   // DISARMED
   				ledcWrite(3,3222);
 				ledcWrite(1,COUNT_MID);
 				ledcWrite(2,COUNT_MID);
@@ -164,9 +164,8 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 				release_count++;
 
 				if (release_count >= CHUTE_RELEASE_CHECKS) {
-					releaseChute(); // <--------------- TODO: Implement & test
+					releaseChute();
 					delay(CHUTE_DROP_DELAY);
-					// might want a command here to fly away from falling chute after release
 					switchState(state, LANDING);
 					release_count = 0;
 					hold_timeout = millis();
