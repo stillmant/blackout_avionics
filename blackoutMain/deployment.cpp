@@ -1,5 +1,6 @@
 #include "deployment.h"
 #include "sensors.h"
+#include "flight.h"
 
 #include <Arduino.h>
 #include <HardwareSerial.h>
@@ -30,6 +31,16 @@ void initChannels(){
     ledcSetup(4, 50, 16);
     ledcSetup(5, 50, 16);
     ledcSetup(6, 50, 16);
+}
+
+void initFC(){
+    ledcWrite(5,3222);   //DISARMED CONTROLLER
+    ledcWrite(3,3222);
+
+    ledcWrite(1,COUNT_MID);
+    ledcWrite(2,COUNT_MID);
+    ledcWrite(4,COUNT_MID);
+    ledcWrite(6,COUNT_MID);
 }
 
 //inititalize pins to output, must be called in setup()
