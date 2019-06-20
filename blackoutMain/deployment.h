@@ -14,6 +14,7 @@
 #define DEPLOY_CHANNEL 0
 #define RELEASE_CHANNEL 1
 
+void initChannels();
 void initDeployment();
 void deployChute();
 void deployRotors();
