@@ -9,13 +9,13 @@
 //PID CONTROLLER VALUES for HOVER
 double kp = 200;
 double ki = 0;
-double kd = 1;
+double kd = 10;
 
 double runPIDhold(float *altitude, bool reset_PID){
     double input = *altitude;
     double output = computePID(input, setPointHover, reset_PID);
-    output = constrain(output, LOW_MAP_MIN, HIGH_MAP_MIN);
-    output = map(output, LOW_MAP_MIN, HIGH_MAP_MIN, COUNT_PID_LOW, COUNT_HIGH);
+    output = constrain(output, LOW_PID_OUT, HIGH_PID_OUT);
+    output = map(output, LOW_PID_OUT, HIGH_PID_OUT, COUNT_PID_LOW, COUNT_HIGH);
     return output;
 }
 
@@ -34,18 +34,20 @@ double runPIDland(float * altitude){
 }
 
 double pdBang(double output){
+    static double max_threshold = MAX_DIFF * kp;
+    static double min_threshold = MIN_DIFF * kp;
     double mapped;
 
     if (output >= 0){
         // map aggressively > quickly to MAX
-        mapped = constrain(output, LOW_MAP_MAX, HIGH_MAP_MAX);
-        mapped = map(mapped, LOW_MAP_MAX, HIGH_MAP_MAX, COUNT_PID_LOW, COUNT_HIGH);
+        mapped = constrain(output, - max_threshold, max_threshold);
+        mapped = map(mapped, - max_threshold, max_threshold, COUNT_PID_LOW, COUNT_HIGH);
     }
 
     else{
         // map conservatively > nearer to hover point
-        mapped = constrain(output, LOW_MAP_MIN, HIGH_MAP_MIN);
-        mapped = map(mapped, LOW_MAP_MIN, HIGH_MAP_MIN, COUNT_PID_LOW, COUNT_HIGH);
+        mapped = constrain(output, - min_threshold, min_threshold);
+        mapped = map(mapped, - min_threshold, min_threshold, COUNT_PID_LOW, COUNT_HIGH);
     }
 
     return mapped;
