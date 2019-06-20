@@ -8,8 +8,8 @@
 #define LOW_PID_OUT -1000 //-40000  //Throttle
 #define HIGH_PID_OUT 1000 //40000   //Throttle
 
-#define MAX_DIFF 3
-#define MIN_DIFF 10
+#define MAX_DIFF 2.5
+#define MIN_DIFF 15
 
 #define COUNT_LOW 3222     //999 = (0%)
 #define COUNT_PID_LOW 5550 // ~ 1850 midpoint

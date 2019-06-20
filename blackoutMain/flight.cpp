@@ -9,7 +9,7 @@
 //PID CONTROLLER VALUES for HOVER
 double kp = 200;
 double ki = 0;
-double kd = 10;
+double kd = 1000;
 
 double runPIDhold(float *altitude, bool reset_PID){
     double input = *altitude;
@@ -39,13 +39,11 @@ double pdBang(double output){
     double mapped;
 
     if (output >= 0){
-        // map aggressively > quickly to MAX
         mapped = constrain(output, - max_threshold, max_threshold);
         mapped = map(mapped, - max_threshold, max_threshold, COUNT_PID_LOW, COUNT_HIGH);
     }
 
     else{
-        // map conservatively > nearer to hover point
         mapped = constrain(output, - min_threshold, min_threshold);
         mapped = map(mapped, - min_threshold, min_threshold, COUNT_PID_LOW, COUNT_HIGH);
     }
@@ -56,14 +54,14 @@ double pdBang(double output){
 double computePID(double inp, double setPoint, bool reset_PID){
     static double elapsedTime, error = 0, cumError = 0, rateError = 0, lastError = 0;
     unsigned long currentTime;
-    static unsigned long previousTime = millis()/10;
+    static unsigned long previousTime = millis() / 10;
 
     if (reset_PID){
         cumError = 0;
         rateError = 0;
         lastError = 0;
     }
-    currentTime = millis()/10;                //get current time
+    currentTime = millis() / 10;                //get current time
     elapsedTime = (double)(currentTime - previousTime);        //compute time elapsed from previous computation
 
     error = setPoint - inp;                                // determine error
