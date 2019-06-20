@@ -4,6 +4,26 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 
+void initChannels(){
+
+    // FLIGHT CONTROLLER SETUP
+    ledcAttachPin(roll, 1);
+    ledcAttachPin(pitch, 2);
+    ledcAttachPin(yaw, 3);
+    ledcAttachPin(throt, 4);
+
+    ledcAttachPin(arm, 5);
+    ledcAttachPin(manual, 6);
+
+    // ledcSetup(channel, Hz, 16-bit resolution)
+    ledcSetup(1, 50, 16);
+    ledcSetup(2, 50, 16);
+    ledcSetup(3, 50, 16);
+    ledcSetup(4, 50, 16);
+    ledcSetup(5, 50, 16);
+    ledcSetup(6, 50, 16);
+}
+
 //inititalize pins to output, must be called in setup()
 void initDeployment(){
     pinMode(ARMS_IGNITER_PIN, OUTPUT);

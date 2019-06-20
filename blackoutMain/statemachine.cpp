@@ -35,7 +35,8 @@ void switchState(States *curr_state, States new_state){
  * @return void.
  */
 void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPressure, float *groundAlt, double *distToTrgt, States *state, int *photo_resistor, float accel_data[], float ground_pressure_set[]) {
-	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0, hover_count = 0, photo_count = 0;
+	static int launch_count = 0, apogee_count = 0, deploy_count = 0, release_count = 0;
+	static int hover_count = 0, photo_count = 0, mach_lock_count = 0, mach_count = 0;
 	static unsigned long delay_start, hold_timeout;
 	static int base_alt_counter = 0;
 	static bool rotors_deployed = false, rotors_armed = false, apogee = false;
@@ -43,6 +44,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 	static uint32_t old_time_landed = millis();
 	static float old_altitude_landed = *alt;
 	static int land_count = 0;
+	static float prev_delta_altitude = *delta_alt;
 
 	switch (*state) {
 		case STANDBY:
@@ -66,6 +68,17 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 
 		// check for apogee
 		case ASCENT:
+			if (*delta_alt > MACH_THRESHOLD) {
+				mach_count++;
+				if (mach_count >= MACH_CHECKS) {
+					switchState(state, MACH_LOCK);
+					mach_count = 0;
+				}
+			}
+			else {
+				mach_count = 0;
+			}
+
 			if (*delta_alt <= 0) {
                 apogee_count ++;
                 if (apogee_count >= APOGEE_CHECKS) {
@@ -86,6 +99,19 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 				}
 			} else {
 				photo_count = 0;
+			}
+			break;
+
+		case MACH_LOCK:
+			if ((*delta_alt < MACH_LOCK_THRESHOLD) && (*delta_alt < prev_delta_altitude) ) {
+				mach_lock_count++;
+				if (mach_lock_count >= MACH_LOCK_CHECKS) {
+					switchState(state, ASCENT);
+					mach_lock_count = 0;
+				}
+			}
+			else {
+				mach_lock_count = 0;
 			}
 			break;
 
@@ -190,4 +216,5 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 		case LANDED:
 			break;
 	}
+	prev_delta_altitude = *delta_alt;
 }
