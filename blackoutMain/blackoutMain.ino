@@ -125,14 +125,15 @@ void loop() {
       Serial.println("OFF");
     }
     else{
-      ledcWrite(5,6540);
+      // ledcWrite(5,6540);
       motor = true;
       Serial.println("ARMED");
     }
 
     if (motor == true){
       if (delay_done == false){
-        delay(1000);
+        ledcWrite(5,6540);
+        delay(1500);
         delay_done = true;
       }
       if (reset == true){

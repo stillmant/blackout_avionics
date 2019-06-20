@@ -5,10 +5,11 @@
 #define LANDED_POLLING_TIME_INTERVAL 5000 //ms
 #define NOMINAL_POLLING_TIME_INTERVAL 50  //ms
 
-#define LOW_PID_OUT -3000 //-40000  //Throttle
-#define HIGH_PID_OUT 3000 //40000   //Throttle
+#define LOW_PID_OUT -2500 //-40000  //Throttle
+#define HIGH_PID_OUT 2500 //40000   //Throttle
 
 #define COUNT_LOW 3222     //999 = (0%)
+#define COUNT_PID_LOW 5332 //~ 1400
 #define COUNT_MID 4870    //1500 = (50%)
 #define COUNT_HIGH 6520   //2001 = (100%)
 
