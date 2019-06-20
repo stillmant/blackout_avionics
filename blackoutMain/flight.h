@@ -5,11 +5,16 @@
 // #define LANDED_POLLING_TIME_INTERVAL 5000 //ms
 // #define NOMINAL_POLLING_TIME_INTERVAL 50  //ms
 
-#define LOW_PID_OUT -1000 //-40000  //Throttle
-#define HIGH_PID_OUT 1000 //40000   //Throttle
+// #define LOW_PID_OUT -1000 //-40000  //Throttle
+// #define HIGH_PID_OUT 1000 //40000   //Throttle
+
+#define LOW_MAP_MAX     -100
+#define HIGH_MAP_MAX    100
+#define LOW_MAP_MIN     -1500
+#define HIGH_MAP_MIN    -1500
 
 #define COUNT_LOW 3222     //999 = (0%)
-#define COUNT_PID_LOW 5332 //1820 midpoint
+#define COUNT_PID_LOW 5530 // ~ 1850 midpoint
 #define COUNT_MID 4868    //1500 = (50%)
 #define COUNT_HIGH 6520   //2001 = (100%)
 
@@ -23,6 +28,7 @@
 /* FUNCTIONS ---------------------------------------*/
 double runPIDhold(float *altitude, bool reset_PID);
 double runPIDland(float * altitude);
+double pdBang(double output);
 double computePID(double inp, double setPoint, bool reset_PID);
 
 #endif

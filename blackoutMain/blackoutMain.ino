@@ -90,8 +90,4 @@ void loop() {
     }
   }
 
-  if (state == LANDED){
-    ledcWrite(5, COUNT_LOW);
-  }
-
 }
