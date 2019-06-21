@@ -9,7 +9,7 @@
 //PID CONTROLLER VALUES for HOVER
 double kp = 200;
 double ki = 0;
-double kd = 1000;
+double kd = 500;
 
 double runPIDhold(float *altitude, bool reset_PID){
     double input = *altitude;

@@ -25,12 +25,12 @@ static float ground_pressure_set[GROUND_PRESSURE_AVG_SET_SIZE];
 /*---Functions----------------------------------------------------------*/
 void setup() {
   delay(1000);
-
   initSensors(); // Initialize sensors
+  delay(200);
   initDeployment(); // Inititalize deployment event pins
+  delay(100);
   initChannels(); // Initialize channels for flight controller
   delay(1000);
-
   initFC(); // initializes flight controller vars
   delay(5000);          //Wait 5 seconds for FC startup
 
@@ -75,6 +75,7 @@ void loop() {
     pollSensors(&lat, &lon, &gpsAlt, &gpsSats, barData, accelData, magData, &photo_resistor);
     crunchNumbers(barData, accelData, magData, &pressure, &groundPressure, &prev_alt, &alt, &delta_alt, &delta_time, pressure_set);
     stateMachine(&alt, &delta_alt, &pressure, &groundPressure, &groundAlt, &distToTrgt, &state, &photo_resistor, accelData, ground_pressure_set);
+
   }
 
   if ((new_time - old_PID_time) >= PID_UPDATE_TIME_INTERVAL) {

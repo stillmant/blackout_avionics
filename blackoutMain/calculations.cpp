@@ -53,8 +53,8 @@ float calculatePressureAverage(float average_set[]){
 
 float calculateGroundPressureAverage(float average_set[], int set_size){
     float sum = 0;
-    for(int i = 0; i < GROUND_PRESSURE_AVG_SET_SIZE; i++){
+    for(int i = 0; i < set_size; i++){
         sum = sum + average_set[i];
     }
-    return sum / GROUND_PRESSURE_AVG_SET_SIZE;
+    return sum / set_size;
 }

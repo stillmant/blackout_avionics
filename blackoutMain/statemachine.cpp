@@ -58,7 +58,7 @@ void stateMachine(float *alt, float *delta_alt, float *pressure, float *groundPr
 				launch_count = 0;
 				base_alt_counter++;
 				if(base_alt_counter >= 100){
-					addToPressureSet(ground_pressure_set, *alt, GROUND_PRESSURE_AVG_SET_SIZE);
+					addToPressureSet(ground_pressure_set, *pressure, GROUND_PRESSURE_AVG_SET_SIZE);
 					*groundPressure = calculateGroundPressureAverage(ground_pressure_set, GROUND_PRESSURE_AVG_SET_SIZE);
 					*groundAlt = 44330.0 * (1 - powf(*groundPressure / SEA_PRESSURE, 1 / 5.255));
 					base_alt_counter = 0;

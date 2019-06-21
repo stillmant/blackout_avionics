@@ -55,6 +55,9 @@ void initDeployment(){
 
     ledcSetup(RELEASE_CHANNEL, FREQUENCY, RESOLUTION);
     ledcAttachPin(CHUTE_CUT_PIN, RELEASE_CHANNEL);
+    delay(1);
+    ledcWrite(DEPLOY_CHANNEL, 0);
+    ledcWrite(RELEASE_CHANNEL, 0);
 }
 
 void deployChute(){
